@@ -55,8 +55,12 @@ public class QuadCreator : MonoBehaviour
 
         meshFilter.mesh = mesh;
 
-        var plane = GameObject.Find("Plane");
-        var plane_transform = plane.GetComponent<Transform>();
+        var plane    = GameObject.Find("Plane");
+        var bounds   = plane.GetComponent<Renderer>().bounds;
+        var position = plane.GetComponent<Transform>().position;
+        var rotation = plane.GetComponent<Transform>().rotation;
+
+        gameObject.GetComponent<Transform>().SetPositionAndRotation(position, rotation);
     }
 
     // Update is called once per frame
