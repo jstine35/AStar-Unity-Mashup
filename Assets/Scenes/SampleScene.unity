@@ -229,7 +229,7 @@ GameObject:
   m_Layer: 0
   m_Name: PlaneSprite
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 419385456094870383, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -302,8 +302,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 597317541}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 23.816345, y: 0, z: 32.34}
-  m_LocalScale: {x: 4.7927, y: 1, z: 6.4523993}
+  m_LocalPosition: {x: 10, y: 0, z: 10}
+  m_LocalScale: {x: 2, y: 1, z: 2}
   m_Children: []
   m_Father: {fileID: 606451896}
   m_RootOrder: 0
@@ -597,7 +597,7 @@ Transform:
   m_GameObject: {fileID: 1310967574}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -71.7, z: 44}
-  m_LocalScale: {x: 1, y: 8, z: 1}
+  m_LocalScale: {x: 0, y: 0, z: 0}
   m_Children:
   - {fileID: 400025738}
   m_Father: {fileID: 0}
@@ -615,4 +615,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48cb60b15112d8a4f933e66ab0de107e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scale: {x: 2, y: 4, z: 2}
+  scale: {x: 1, y: 8, z: 1}

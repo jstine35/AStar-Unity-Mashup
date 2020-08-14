@@ -40,23 +40,31 @@ public class main : MonoBehaviour
         var position = plane.GetComponent<Transform>().position;
         var rotation = plane.GetComponent<Transform>().rotation;
 
-        //gameObject.GetComponent<Transform>().localScale = scale;
-        //gameObject.GetComponent<Transform>().SetPositionAndRotation(position, rotation);
-
         Vector3 origin = position; //new Vector3(bounds.min.x, 0, bounds.min.z);
         int2 map_size = new int2 { x = map[0].Length, y = map.Length };
+
+        var planeScale = new Vector3(map_size.x, 1, map_size.y);
+        var planesprite = GameObject.Find("PlaneSprite");
+        plane.GetComponent<Transform>().localScale = planeScale;
+        //planesprite.GetComponent<Transform>().localScale = planeScale;
+
+        //var gridScale = new Vector3(20.0f/map_size.x, 1, 20.0f/map_size.y);
+        var gridScale = new Vector3(20, 1, 20);
+        var cubeScale = gridScale;
+        cubeScale.Scale(CubeWallPrefab.GetComponent<Transform>().localScale);
+
 
         for (int y=0; y<map_size.y; ++y) {
             for (int x=0; x<map_size.x; ++x) {
                 if (map[y][x] == 'A' || map[y][x] == 'B') continue;
                 if (map[y][x] == ' ') continue;
 
-                var scale = CubeWallPrefab.GetComponent<Transform>().localScale;
                 var startpos = new Vector3(
-                    origin.x + (x * scale.x), 0,
-                    origin.z + (y * scale.z)
+                    origin.x + (x * gridScale.x), 0,
+                    origin.z + (y * gridScale.z)
                 );
-                Instantiate(CubeWallPrefab, startpos, Quaternion.identity, plane.GetComponent<Transform>());
+                var newcube = Instantiate(CubeWallPrefab, startpos, Quaternion.identity, plane.GetComponent<Transform>());
+                newcube.GetComponent<Transform>().localScale = CubeWallPrefab.GetComponent<Transform>().localScale;
             }
         }
 

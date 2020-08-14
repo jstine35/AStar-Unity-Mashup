@@ -10,13 +10,6 @@ public class CubeCreator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //var plane    = GameObject.Find("Plane");
-        //var bounds   = plane.GetComponent<Renderer>().bounds;
-        //var position = plane.GetComponent<Transform>().position;
-        //var rotation = plane.GetComponent<Transform>().rotation;
-        //
-        gameObject.GetComponent<Transform>().localScale = scale;
-        //gameObject.GetComponent<Transform>().SetPositionAndRotation(position, rotation);
     }
 
     // Update is called once per frame

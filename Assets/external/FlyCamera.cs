@@ -32,7 +32,6 @@ public class FlyCamera : MonoBehaviour {
         //Mouse  camera angle done.
 
         //Keyboard commands
-        float f = 0.0f;
         Vector3 p = GetBaseInput();
         if (Input.GetKey (KeyCode.LeftShift)){
             totalRun += Time.deltaTime;
@@ -47,14 +46,14 @@ public class FlyCamera : MonoBehaviour {
         }
 
         p = p * Time.deltaTime;
-       Vector3 newPosition = transform.position;
+        Vector3 newPosition = transform.position;
         if (Input.GetKey(KeyCode.Space)){ //If player wants to move on X and Z axis only
             transform.Translate(p);
             newPosition.x = transform.position.x;
             newPosition.z = transform.position.z;
             transform.position = newPosition;
         }
-        else{
+        else {
             transform.Translate(p);
         }
 
