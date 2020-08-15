@@ -48,6 +48,26 @@ namespace AStar
             // return empty struct if nothing found
             return new int2();
         }
+
+        // Draws a line between points and fails if any point lands on a non-traversable
+        // tile. This was a failed experiment. It seems the better strategy is to use 8-way
+        // A* pathfinding instead.
+        public static bool Walkable(string[] map, int2 start, int2 end) {
+            int dx = end.x - start.x;
+            int dy = end.y - start.y;
+
+            if (dx == 0 || dy == 0) return true;
+
+            double delta = (double)dy / dx;
+            double y = start.y;
+            double sign_x = Math.Sign(dx);
+            double sign_y = Math.Sign(dy);
+            for(double x=start.x; x != end.x; x += sign_x, y += delta * sign_x) {
+                int2 coord1  = new int2((int)x, (int)Math.Round(y));
+                if (map[coord1.y][coord1.x] != ' ') return false;
+            }
+            return true;
+        }
     }
 
     public class InternalMap {

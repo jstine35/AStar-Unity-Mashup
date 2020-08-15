@@ -44,10 +44,6 @@ public class FollowPath : MonoBehaviour
         HasPrevTarget = false;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-    }
 
     public Vector3 CatmulRom(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float dist_pct)
     {
@@ -110,7 +106,7 @@ public class FollowPath : MonoBehaviour
         // simulate the linear movement from point to point in a straight line, and use that distance to
         // determine the current step along the curved path.
         //
-        // This is a rushed implementation of non-segmented catmull-rom, which looks nice but results in non-
+        // This is a rushed implementation of non-segmented catmull-rom, which looks OK but results in non-
         // uniform movement speed across the curve. Online resources mutter ideals of derivatives, but those are
         // non-trivial and present other issues and estimations. I believe the easiest solution is to measure
         // the actual distance moved via catmull and compensate the straight-line simulation the next frame (or
@@ -122,7 +118,7 @@ public class FollowPath : MonoBehaviour
 
             simulated_position = Vector3.MoveTowards(simulated_position, CurrentTarget, step);
 
-            if (HasFutureTarget && HasPrevTarget && HasPastTarget) {
+            if (SplineMovement && HasFutureTarget && HasPrevTarget && HasPastTarget) {
                 float rem_dist     = Vector3.Distance(simulated_position, CurrentTarget);
                 float total_dist   = Vector3.Distance(starting_position, CurrentTarget);
                 float t = 1.0f - (rem_dist / total_dist);
@@ -139,5 +135,10 @@ public class FollowPath : MonoBehaviour
                 HasPrevTarget = true;
             }
         }
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
     }
 }
