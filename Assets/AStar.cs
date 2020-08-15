@@ -135,6 +135,7 @@ namespace AStar
 
                 // if we added the destination to the closed list, we've found a path
                 if (internalMap[target].closed > 0) {
+                    yield return curpos;
                     break;
                 }
 

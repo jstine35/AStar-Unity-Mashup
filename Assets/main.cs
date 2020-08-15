@@ -22,8 +22,8 @@ public class main : MonoBehaviour
     {
         "+-----------------+",
         "|                 |",
-        "|                 |",
-        "|                 |",
+        "|             X   |",
+        "|            XX   |",
         "| Xxxxxxxxxxxxx   |",
         "|  x              |",
         "|x  x             |",
@@ -76,7 +76,6 @@ public class main : MonoBehaviour
     void Start()
     {
         var plane    = GameObject.Find("Plane");
-        //var bounds   = plane.GetComponent<Renderer>().bounds;
         var position = plane.GetComponent<Transform>().position;
         var rotation = plane.GetComponent<Transform>().rotation;
 
@@ -121,6 +120,7 @@ public class main : MonoBehaviour
             ++bci;
         }
         stickpath.waypoints.Reverse();
+        stickpath.ApplyWaypointList();
     }
 
     // Update is called once per frame
