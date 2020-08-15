@@ -115,12 +115,29 @@ namespace AStar
             return Math.Abs(targetX - x) + Math.Abs(targetY - y);
         }
 
-        public static IEnumerable<int2> WalkableAdjacentSquares(int x, int y)
+        public static IEnumerable<int2> WalkableAdjacentSquares(string[] map, int x, int y)
         {
             yield return new int2(x, y - 1);
             yield return new int2(x, y + 1);
             yield return new int2(x - 1, y);
             yield return new int2(x + 1, y);
+
+            // Diagonals.
+            if (map[y-1][x] == ' ' && map[y][x-1] == ' ') {
+                yield return new int2(x - 1, y - 1);
+            }
+
+            if (map[y+1][x] == ' ' && map[y][x+1] == ' ') {
+                yield return new int2(x + 1, y + 1);
+            }
+
+            if (map[y+1][x] == ' ' && map[y][x-1] == ' ') {
+                yield return new int2(x - 1, y + 1);
+            }
+
+            if (map[y-1][x] == ' ' && map[y][x+1] == ' ') {
+                yield return new int2(x + 1, y - 1);
+            }
         }
 
         public static IEnumerable<int2> FindPath(string[] map, PathState pathstate) {
@@ -162,7 +179,7 @@ namespace AStar
                 // WalkableAdjacentSquares is pretty, but it causes heap alloc for the yieldable machine state.
                 // could avoid it using an unrolled functional approach rather than a foreach...
 
-                foreach(var adjpos in WalkableAdjacentSquares(curpos.x, curpos.y))
+                foreach(var adjpos in WalkableAdjacentSquares(map, curpos.x, curpos.y))
                 {
                     if (map[adjpos.y][adjpos.x] != ' ' && map[adjpos.y][adjpos.x] != 'B') {
                         continue;

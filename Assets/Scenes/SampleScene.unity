@@ -349,6 +349,7 @@ GameObject:
   - component: {fileID: 491157516}
   - component: {fileID: 491157515}
   - component: {fileID: 491157514}
+  - component: {fileID: 491157518}
   m_Layer: 0
   m_Name: StickatarSprite
   m_TagString: Untagged
@@ -367,9 +368,9 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   m_Radius: 0.5000001
-  m_Height: 2
+  m_Height: 1.7629766
   m_Direction: 1
-  m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
+  m_Center: {x: 0.000000066227386, y: 0.11851168, z: -0.00000009934107}
 --- !u!23 &491157515
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -431,6 +432,18 @@ Transform:
   m_Father: {fileID: 1011201391}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &491157518
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 491157513}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d7de7952cd007f4f99bc9a0c46da5c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &597317541
 GameObject:
   m_ObjectHideFlags: 0
@@ -887,8 +900,9 @@ MonoBehaviour:
   MoveSpeed: 13
   waypoints: []
   CurrentTarget: {x: 0, y: 0, z: 0}
-  HasTarget: 0
   Suspended: 0
+  SplineMovement: 1
+  splineParametic: 0.4
 --- !u!1 &1096255666
 GameObject:
   m_ObjectHideFlags: 0
