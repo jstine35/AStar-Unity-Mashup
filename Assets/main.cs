@@ -46,9 +46,7 @@ public class main : MonoBehaviour
         var planeScale = new Vector3(map_size.x, 1, map_size.y);
         var planesprite = GameObject.Find("PlaneSprite");
         plane.GetComponent<Transform>().localScale = planeScale;
-        //planesprite.GetComponent<Transform>().localScale = planeScale;
 
-        //var gridScale = new Vector3(20.0f/map_size.x, 1, 20.0f/map_size.y);
         var gridScale = new Vector3(20, 1, 20);
         var cubeScale = gridScale;
         cubeScale.Scale(CubeWallPrefab.GetComponent<Transform>().localScale);
