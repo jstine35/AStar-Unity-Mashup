@@ -7,6 +7,17 @@ public class main : MonoBehaviour
 {
     public GameObject CubeWallPrefab;
 
+    // Map can be any size. Size will be calculated from the input data.
+    //
+    // Pathing Assumptions and Map Requirements:
+    //  - all rows are of equal length
+    //  - all borders are always closed (non-traversable)
+    //     - the path finder does not perform bounds checking
+    //  - Only one 'A' (start) and 'B' (target) exist
+    //     - if there are multiple, the nearst to 0,0 will be used
+    //
+    // TODO: verify these assumptions when analysing input map data
+
     string[] map = new string[]
     {
         "+-----------------+",
@@ -32,6 +43,21 @@ public class main : MonoBehaviour
         "+-----------------+",
     };
 
+    void SetupAvatars(Vector3 gridScale)
+    {
+        var start  = AsciiMap.Find(map, 'A');
+        var target = AsciiMap.Find(map, 'B');
+
+        var stickatar = GameObject.Find("Stickatar");
+        var targatar  = GameObject.Find("Targatar");
+
+        stickatar.GetComponent<Transform>().localPosition = new Vector3(
+            (start.x * gridScale.x), 0,
+            (start.y * gridScale.z)
+        );
+
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -51,7 +77,6 @@ public class main : MonoBehaviour
         var cubeScale = gridScale;
         cubeScale.Scale(CubeWallPrefab.GetComponent<Transform>().localScale);
 
-
         for (int y=0; y<map_size.y; ++y) {
             for (int x=0; x<map_size.x; ++x) {
                 if (map[y][x] == 'A' || map[y][x] == 'B') continue;
@@ -65,6 +90,8 @@ public class main : MonoBehaviour
                 newcube.GetComponent<Transform>().localScale = CubeWallPrefab.GetComponent<Transform>().localScale;
             }
         }
+
+        SetupAvatars(gridScale);
 
         var curpos = new int2();
         var pathstate = new Yieldable.PathState();

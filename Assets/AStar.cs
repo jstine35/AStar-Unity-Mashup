@@ -35,6 +35,21 @@ namespace AStar
         }
     };
 
+    public class AsciiMap {
+        public static int2 Find(string[] map, char ch) {
+            int2 map_size = new int2 { x = map[0].Length, y = map.Length };
+            for (int y=0; y<map_size.y; ++y) {
+                for (int x=0; x<map_size.x; ++x) {
+                    if (map[y][x] == ch) {
+                        return new int2(x,y);
+                    }
+                }
+            }
+            // return empty struct if nothing found
+            return new int2();
+        }
+    }
+
     public class InternalMap {
         public AwesomeTile[,] m_tiles;
 
@@ -74,7 +89,7 @@ namespace AStar
         public class PathState {
             public InternalMap internal_map;
         };
-        
+
         public static int ComputeHScore(int x, int y, int targetX, int targetY)
         {
             return Math.Abs(targetX - x) + Math.Abs(targetY - y);
@@ -95,29 +110,9 @@ namespace AStar
 
             var internalMap = pathstate.internal_map;
             var curpos = new int2();
-            var start  = new int2();
-            var target = new int2();
+            var start  = AsciiMap.Find(map, 'A');
+            var target = AsciiMap.Find(map, 'B');
             var openList = new SortedList<OpenListKey, int>(map_size_in_tiles, new OpenListComparer());
-
-            if (true) {
-                int y = 0;
-                int x = 0;
-                foreach (var row in map) {
-                    x = 0;
-                    foreach (var tile in row) {
-                        if (tile == 'A') {
-                            start.x = x;
-                            start.y = y;
-                        }
-                        if (tile == 'B') {
-                            target.x = x;
-                            target.y = y;
-                        }
-                        ++x;
-                    }
-                    ++y;
-                }
-            }
 
             // start by adding the original position to the open list
             openList.Add(new OpenListKey(start, 0), 0);
