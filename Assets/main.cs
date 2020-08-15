@@ -43,7 +43,23 @@ public class main : MonoBehaviour
         "+-----------------+",
     };
 
-    void SetupAvatars(Vector3 gridScale)
+    static float   g_planeUnits   = 20.0f;
+    static float   g_mapScale     = 0.25f;
+    static float   g_mapSizeUnits = g_planeUnits * g_mapScale;
+    static Vector3 g_gridScale    = new Vector3(g_mapSizeUnits, 1, g_mapSizeUnits);
+
+    public Vector3 TranslateGridCoordToWorld(int2 coord, float y_hack) {
+        var plane    = GameObject.Find("Plane");
+        var origin   = plane.transform.position;
+
+        return new Vector3(
+            origin.x + (coord.x * g_gridScale.x),
+            origin.y + y_hack,
+            origin.z + (coord.y * g_gridScale.z)
+        );
+    }
+
+    void SetupAvatars()
     {
         var start  = AsciiMap.Find(map, 'A');
         var target = AsciiMap.Find(map, 'B');
@@ -51,10 +67,8 @@ public class main : MonoBehaviour
         var stickatar = GameObject.Find("Stickatar");
         var targatar  = GameObject.Find("Targatar");
 
-        stickatar.GetComponent<Transform>().localPosition = new Vector3(
-            (start.x * gridScale.x), 0,
-            (start.y * gridScale.z)
-        );
+        stickatar.transform.position = TranslateGridCoordToWorld(start,  stickatar.GetComponent<Transform>().localScale.y);
+        targatar .transform.position = TranslateGridCoordToWorld(target, stickatar.GetComponent<Transform>().localScale.y);
 
     }
 
@@ -66,15 +80,13 @@ public class main : MonoBehaviour
         var position = plane.GetComponent<Transform>().position;
         var rotation = plane.GetComponent<Transform>().rotation;
 
-        Vector3 origin = position; //new Vector3(bounds.min.x, 0, bounds.min.z);
         int2 map_size = new int2 { x = map[0].Length, y = map.Length };
 
-        var planeScale = new Vector3(map_size.x, 1, map_size.y);
+        var planeScale = new Vector3(map_size.x * g_mapScale, 1, map_size.y * g_mapScale);
         var planesprite = GameObject.Find("PlaneSprite");
         plane.GetComponent<Transform>().localScale = planeScale;
 
-        var gridScale = new Vector3(20, 1, 20);
-        var cubeScale = gridScale;
+        var cubeScale = g_gridScale;
         cubeScale.Scale(CubeWallPrefab.GetComponent<Transform>().localScale);
 
         for (int y=0; y<map_size.y; ++y) {
@@ -82,16 +94,13 @@ public class main : MonoBehaviour
                 if (map[y][x] == 'A' || map[y][x] == 'B') continue;
                 if (map[y][x] == ' ') continue;
 
-                var startpos = new Vector3(
-                    origin.x + (x * gridScale.x), 0,
-                    origin.z + (y * gridScale.z)
-                );
+                var startpos = TranslateGridCoordToWorld(new int2(x,y), 0);
                 var newcube = Instantiate(CubeWallPrefab, startpos, Quaternion.identity, plane.GetComponent<Transform>());
                 newcube.GetComponent<Transform>().localScale = CubeWallPrefab.GetComponent<Transform>().localScale;
             }
         }
 
-        SetupAvatars(gridScale);
+        SetupAvatars();
 
         var curpos = new int2();
         var pathstate = new Yieldable.PathState();
@@ -100,11 +109,22 @@ public class main : MonoBehaviour
             curpos = pos;
             //Debug.Log($"NavPos: {curpos.x} x {curpos.y}");
         }
+
+        var stickatar = GameObject.Find("Stickatar");
+        var stickpath = stickatar.GetComponent<FollowPath>();
+
+        var backtrack = curpos;
+        int bci = 0;
+        while (!backtrack.equal0()) {
+            stickpath.waypoints.Add(TranslateGridCoordToWorld(backtrack, 0));
+            backtrack = pathstate.internal_map[backtrack].Parent;
+            ++bci;
+        }
+        stickpath.waypoints.Reverse();
     }
 
     // Update is called once per frame
     void Update()
     {
-
     }
 }
