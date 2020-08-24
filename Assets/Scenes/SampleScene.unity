@@ -899,7 +899,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MoveSpeed: 13
   waypoints: []
-  CurrentTarget: {x: 0, y: 0, z: 0}
+  CurrentTarget: {x: 8, y: 0, z: 8}
   Suspended: 0
   SplineMovement: 1
   splineParametic: 0.4
@@ -960,7 +960,7 @@ GameObject:
   m_Layer: 0
   m_Name: DynamicCube
   m_TagString: Untagged
-  m_Icon: {fileID: 2974397684917235467, guid: 0000000000000000d000000000000000, type: 0}
+  m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1

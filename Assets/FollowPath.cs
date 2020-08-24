@@ -137,6 +137,18 @@ public class FollowPath : MonoBehaviour
         }
     }
 
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawSphere(CurrentTarget, 1.2f);
+
+        Gizmos.color = Color.yellow;
+        foreach(var waypoint in waypoints) {
+            Gizmos.DrawSphere(waypoint, 0.4f);
+        }
+    }
+
+
     // Start is called before the first frame update
     void Start()
     {
