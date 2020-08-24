@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using AStar;
+using UnityEngine.SocialPlatforms;
 
 public class main : MonoBehaviour
 {
@@ -44,16 +45,28 @@ public class main : MonoBehaviour
         "+-----------------+",
     };
 
-    public float   g_planeUnits   = 10.0f;          // unit size of the default unity plane at scale=1 (TODO: calculate this at run)
-    public float   g_mapScale     = 0.25f;          // scalar to reduce size of map, to avoid excess unit coord size on very large maps
+    public float   planeUnits   = 10.0f;          // unit size of the default unity plane at scale=1 (TODO: calculate this at run)
+    public float   mapScale     = 0.25f;          // scalar to reduce size of map, to avoid excess unit coord size on very large maps
+
+    [Range(0.4f, 1.2f)]
+    [Tooltip("Adjust size of each wall block, smaller values create gaps between tiles for more retro look")]
+    public float wallSizeScale = 0.9f;  // default
+    float visibleWallSizeScale;
 
     public Vector3 origin;
 
+    // Toggles being treated as buttons.
+    // These are reset to unchecked on each update.
+    [Header("PseudoButtons")]
+    [Tooltip("Rebuilds the map, useful if code changes to map generator have been made.")]
     public bool rebuildMap;
-    public bool restartPath;
+
+    [Tooltip("Restart the built-in path runner.")]
+    public bool restartPathRunner;
+
 
     public float mapSizeUnits {
-        get { return g_planeUnits * g_mapScale; }
+        get { return planeUnits * mapScale; }
     }
 
     public Vector3 mapGridScale {
@@ -90,7 +103,64 @@ public class main : MonoBehaviour
     {
         BuildMap();
         SetupAvatars();
+        RunDefinedCourse();
+    }
 
+    public GameObject[] GetLevelCubes()
+    {
+        return GameObject.FindGameObjectsWithTag("DynamicLevelObject");
+    }
+
+    public void DestroyMap()
+    {
+        foreach(var item in GetLevelCubes()) {
+            GameObject.Destroy(item);
+        }
+    }
+
+    public void LevelScaleCubes(float newScale) {
+        if (visibleWallSizeScale == newScale) return;
+        visibleWallSizeScale = newScale;
+
+        var wallScale3 = new Vector3(visibleWallSizeScale, visibleWallSizeScale, 1);
+        var cubeScale = Vector3.Scale(Vector3.Scale(mapGridScale, wallScale3), CubeWallPrefab.transform.localScale);
+        foreach(var item in GetLevelCubes()) {
+            item.transform.localScale = cubeScale;
+        }
+    }
+
+    public void BuildMap()
+    {
+        var plane = GameObject.Find("Plane");
+        var ray = plane.transform.rotation * Vector3.up;
+        //Debug.DrawLine(Vector3.zero, ray * 10, Color.red, 6);
+
+        int2 map_size = new int2 { x = map[0].Length, y = map.Length };
+
+        // scale the plane so that each map unit is roughly 1 x 1 world units
+        var planeScale = new Vector3(map_size.x * mapScale, 1, map_size.y * mapScale);
+
+        plane.transform.localScale = planeScale;
+        var planeBounds = plane.GetComponent<Renderer>().bounds;
+        origin = planeBounds.max;
+
+        Debug.Log($"origin = {origin}");
+
+        for (int y=0; y<map_size.y; ++y) {
+            for (int x=0; x<map_size.x; ++x) {
+                if (map[y][x] == 'A' || map[y][x] == 'B') continue;
+                if (map[y][x] == ' ') continue;
+
+                var startpos = TranslateGridCoordToWorld(new int2(x,y));
+                var newcube = Instantiate(CubeWallPrefab, startpos, Quaternion.identity);
+                newcube.tag = "DynamicLevelObject";
+            }
+        }
+        LevelScaleCubes(wallSizeScale);
+    }
+
+    public void RunDefinedCourse()
+    {
         var curpos = new int2();
         var pathstate = new Yieldable.PathState();
 
@@ -134,61 +204,30 @@ public class main : MonoBehaviour
         stickpath.ApplyWaypointList();
     }
 
-    public void DestroyMap()
-    {
-        var list = GameObject.FindGameObjectsWithTag("DynamicLevelObject");
-        foreach(var item in list) {
-            GameObject.Destroy(item);
-        }
-    }
-
-    public void BuildMap()
-    {
-        var plane = GameObject.Find("Plane");
-        var ray = plane.transform.rotation * Vector3.up;
-        //Debug.DrawLine(Vector3.zero, ray * 10, Color.red, 6);
-
-        int2 map_size = new int2 { x = map[0].Length, y = map.Length };
-
-        // scale the plane so that each map unit is roughly 1 x 1 world units
-        var planeScale = new Vector3(map_size.x * g_mapScale, 1, map_size.y * g_mapScale);
-
-        plane.transform.localScale = planeScale;
-        var planeBounds = plane.GetComponent<Renderer>().bounds;
-        origin = planeBounds.max;
-
-        Debug.Log($"origin = {origin}");
-
-        var cubeScale = Vector3.Scale(Vector3.Scale(mapGridScale, new Vector3(0.9f, 0.9f, 1)), CubeWallPrefab.transform.localScale);
-
-        for (int y=0; y<map_size.y; ++y) {
-            for (int x=0; x<map_size.x; ++x) {
-                if (map[y][x] == 'A' || map[y][x] == 'B') continue;
-                if (map[y][x] == ' ') continue;
-
-                var startpos = TranslateGridCoordToWorld(new int2(x,y));
-                var newcube = Instantiate(CubeWallPrefab, startpos, Quaternion.identity);
-                newcube.transform.localScale = cubeScale;
-                newcube.tag = "DynamicLevelObject";
-            }
-        }
-    }
-
     // Update is called once per frame
     void Update()
     {
+#if DEBUG
         var plane = GameObject.Find("Plane");
         var ray = plane.transform.rotation * Vector3.up;
         Debug.DrawLine(origin, origin + (ray * 20), Color.red);
+#endif
 
         if (rebuildMap) {
             DestroyMap();
             BuildMap();
         }
 
-        if (restartPath) {
+        if (restartPathRunner) {
+            SetupAvatars();
         }
+
+        if (wallSizeScale != visibleWallSizeScale) {
+            LevelScaleCubes(wallSizeScale);
+        }
+
+        // reset button-like toggles to 0
         rebuildMap = false;
-        restartPath = false;
+        restartPathRunner = false;
     }
 }
