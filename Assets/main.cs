@@ -47,29 +47,22 @@ public class main : MonoBehaviour
     static float   g_planeUnits   = 20.0f;
     static float   g_mapScale     = 0.25f;
     static float   g_mapSizeUnits = g_planeUnits * g_mapScale;
-    static Vector3 g_gridScale    = new Vector3(g_mapSizeUnits, 1, g_mapSizeUnits);
+    static Vector3 g_gridScale    = new Vector3(g_mapSizeUnits, g_mapSizeUnits, 1);
 
-    // for simplicitly, the origin is defined as a 'top-left' corner of a plane on the xz axes.
-    // The complexity of the scene is essentially 2D, with Y only used to extrude the 2D
-    // upwards. In retrospect, it would have been better to spin the plane into the xy axes and
-    // use z for extruding, as it simplifies Vector2/Vector3 conversion.
-    static Vector3 origin;
+    // for simplicitly, the origin is defined as a 'top-left' corner of a plane on the xy axes.
+    // The complexity of the scene is essentially 2D, with Z only used to extrude the 2D
+    // upwards.
+    public Vector3 origin;
 
+    public bool rebuildMap;
+    public bool restartPath;
 
-    public Vector3 TranslateGridCoordToWorld(int2 coord, float y_hack) {
-        return new Vector3(
-            origin.x + (coord.x * g_gridScale.x),
-            origin.y + y_hack,
-            origin.z + (coord.y * g_gridScale.z)
-        );
+    public Vector3 TranslateGridCoordToWorld(int2 coord) {
+        return origin + (Vector3.Scale(new Vector3(coord.x, coord.y, 0), g_gridScale));
     }
 
     public Vector3 TranslateGridCoordToWorld(Vector3 coord) {
-        return new Vector3(
-            origin.x + (coord.x * g_gridScale.x),
-            origin.y,
-            origin.z + (coord.y * g_gridScale.z)
-        );
+        return origin + (Vector3.Scale(coord, g_gridScale));
     }
 
     void SetupAvatars()
@@ -80,36 +73,15 @@ public class main : MonoBehaviour
         var stickatar = GameObject.Find("Stickatar");
         var targatar  = GameObject.Find("Targatar");
 
-        stickatar.transform.position = TranslateGridCoordToWorld(start,  stickatar.transform.localScale.y);
-        targatar .transform.position = TranslateGridCoordToWorld(target, stickatar.transform.localScale.y);
+        stickatar.transform.position = TranslateGridCoordToWorld(start);
+        targatar .transform.position = TranslateGridCoordToWorld(target);
 
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        var plane = GameObject.Find("Plane");
-        origin    = plane.transform.position;
-
-        int2 map_size = new int2 { x = map[0].Length, y = map.Length };
-
-        var planeScale = new Vector3(map_size.x * g_mapScale, 1, map_size.y * g_mapScale);
-        plane.transform.localScale = planeScale;
-
-        var cubeScale = g_gridScale;
-        cubeScale.Scale(CubeWallPrefab.transform.localScale);
-
-        for (int y=0; y<map_size.y; ++y) {
-            for (int x=0; x<map_size.x; ++x) {
-                if (map[y][x] == 'A' || map[y][x] == 'B') continue;
-                if (map[y][x] == ' ') continue;
-
-                var startpos = TranslateGridCoordToWorld(new int2(x,y), 0);
-                var newcube = Instantiate(CubeWallPrefab, startpos, Quaternion.identity, plane.transform);
-                newcube.transform.localScale = CubeWallPrefab.transform.localScale;
-            }
-        }
-
+        BuildMap();
         SetupAvatars();
 
         var curpos = new int2();
@@ -134,7 +106,7 @@ public class main : MonoBehaviour
 
         var startidx = waypoints.Count-1;
         var walkstart = waypoints[startidx];
-        stickpath.waypoints.Add(TranslateGridCoordToWorld(walkstart,0));
+        stickpath.waypoints.Add(TranslateGridCoordToWorld(walkstart));
 
         for (int i=startidx-1; i >= 0; --i) {
             var next = waypoints[i];
@@ -150,13 +122,58 @@ public class main : MonoBehaviour
                 continue;
             }
         #endif
-            stickpath.waypoints.Add(TranslateGridCoordToWorld(next,0));
+            stickpath.waypoints.Add(TranslateGridCoordToWorld(next));
         }
         stickpath.ApplyWaypointList();
+    }
+
+    public void DestroyMap()
+    {
+        var list = GameObject.FindGameObjectsWithTag("DynamicLevelObject");
+        foreach(var item in list) {
+            GameObject.Destroy(item);
+        }
+    }
+
+    public void BuildMap()
+    {
+        var plane = GameObject.Find("Plane");
+        plane.transform.position = new Vector3(0, 0, 0);
+        //plane.transform.rotation = Quaternion.Euler(0,0,90);
+
+        int2 map_size = new int2 { x = map[0].Length, y = map.Length };
+
+        var planeScale = new Vector3(map_size.x * g_mapScale, 1, map_size.y * g_mapScale);
+        origin = new Vector3(planeScale.x / 2, planeScale.y / 2);
+
+        plane.transform.localScale = planeScale;
+
+        var cubeScale = Vector3.Scale(g_gridScale, CubeWallPrefab.transform.localScale);
+
+        for (int y=0; y<map_size.y; ++y) {
+            for (int x=0; x<map_size.x; ++x) {
+                if (map[y][x] == 'A' || map[y][x] == 'B') continue;
+                if (map[y][x] == ' ') continue;
+
+                var startpos = TranslateGridCoordToWorld(new int2(x,y));
+                var newcube = Instantiate(CubeWallPrefab, startpos, Quaternion.identity);
+                newcube.transform.localScale = cubeScale;
+                newcube.tag = "DynamicLevelObject";
+            }
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (rebuildMap) {
+            DestroyMap();
+            BuildMap();
+        }
+
+        if (restartPath) {
+        }
+        rebuildMap = false;
+        restartPath = false;
     }
 }

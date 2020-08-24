@@ -237,13 +237,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 446023701}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -4.4, y: 1.23, z: 4.84}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 671688832}
-  m_Father: {fileID: 606451896}
-  m_RootOrder: 2
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &488035699
 GameObject:
@@ -330,13 +330,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 488035699}
-  m_LocalRotation: {x: 0.795717, y: 0.55227476, z: -0.10832293, w: 0.22381517}
-  m_LocalPosition: {x: -4.68, y: 9.7, z: 35.22}
+  m_LocalRotation: {x: 0.7504252, y: 0.34960413, z: -0.44104227, w: -0.34658438}
+  m_LocalPosition: {x: 19, y: -1.54, z: 7.64}
   m_LocalScale: {x: 1, y: 1, z: 1.1186}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 28.414001, y: 175.12001, z: 109.23801}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: -12.227, y: 247.708, z: 121.82101}
 --- !u!1 &491157513
 GameObject:
   m_ObjectHideFlags: 0
@@ -426,8 +426,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 491157513}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 3, z: 0.5}
-  m_LocalScale: {x: 0.45, y: 4, z: 0.6}
+  m_LocalPosition: {x: 0.5, y: 1, z: 0.5}
+  m_LocalScale: {x: 0.45, y: 1, z: 0.6}
   m_Children: []
   m_Father: {fileID: 1011201391}
   m_RootOrder: 0
@@ -457,7 +457,7 @@ GameObject:
   - component: {fileID: 597317543}
   - component: {fileID: 597317542}
   m_Layer: 0
-  m_Name: PlaneSprite
+  m_Name: Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -531,46 +531,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 597317541}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 10, y: 0, z: 10}
-  m_LocalScale: {x: 2, y: 1, z: 2}
+  m_LocalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 3, y: 1, z: 3}
   m_Children: []
-  m_Father: {fileID: 606451896}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &606451895
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 606451896}
-  m_Layer: 0
-  m_Name: Plane
-  m_TagString: Untagged
-  m_Icon: {fileID: 3306451490063965843, guid: 0000000000000000d000000000000000, type: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &606451896
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 606451895}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.4, y: 1.23, z: 4.84}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 597317545}
-  - {fileID: 1011201391}
-  - {fileID: 446023702}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -90}
 --- !u!1 &671688828
 GameObject:
   m_ObjectHideFlags: 0
@@ -750,13 +717,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 705507993}
-  m_LocalRotation: {x: 0.22397637, y: -0.18360375, z: 0.077585764, w: 0.95399404}
+  m_LocalRotation: {x: 0.23663728, y: -0.5335771, z: -0.013703108, w: 0.8118562}
   m_LocalPosition: {x: 5.23, y: 11.43, z: 6.6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 27.119001, y: -20.765001, z: 4.2390003}
+  m_LocalEulerAnglesHint: {x: 21.691002, y: -69.948006, z: -17.201}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -877,13 +844,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1011201390}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1, y: 0, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 491157517}
-  m_Father: {fileID: 606451896}
-  m_RootOrder: 1
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1011201392
 MonoBehaviour:
@@ -897,12 +864,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 913df0ecfefa11e4094c863ba6067477, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MoveSpeed: 13
-  waypoints: []
-  CurrentTarget: {x: 8, y: 0, z: 8}
-  Suspended: 0
+  MoveSpeed: 14
   SplineMovement: 1
   splineParametic: 0.4
+  Suspended: 0
+  CurrentTarget: {x: 6, y: 0, z: 6}
+  waypoints:
+  - {x: 2, y: 4, z: 2}
+  - {x: 4, y: 4, z: 4}
 --- !u!1 &1096255666
 GameObject:
   m_ObjectHideFlags: 0
@@ -933,6 +902,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CubeWallPrefab: {fileID: 1310967574}
+  origin: {x: 0, y: 0, z: 0}
+  rebuildMap: 0
+  restartPath: 0
 --- !u!4 &1096255668
 Transform:
   m_ObjectHideFlags: 0
@@ -956,7 +928,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1310967575}
-  - component: {fileID: 1310967576}
   m_Layer: 0
   m_Name: DynamicCube
   m_TagString: Untagged
@@ -977,18 +948,5 @@ Transform:
   m_Children:
   - {fileID: 400025738}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1310967576
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1310967574}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 48cb60b15112d8a4f933e66ab0de107e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  scale: {x: 1, y: 8, z: 1}
