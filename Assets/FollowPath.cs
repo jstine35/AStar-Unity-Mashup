@@ -5,18 +5,21 @@ using UnityEngine;
 
 public class FollowPath : MonoBehaviour
 {
+    [Range(4, 32)]
     public float MoveSpeed = 6.0f;
-    public List<Vector3> waypoints = new List<Vector3>();
-    public Vector3 CurrentTarget = new Vector3();
 
-    // Stops waypoint following
-    public bool Suspended = false;
-
-    // apply catmull-rom spline to waypoint list for smoother motion.
+    [Tooltip("apply catmull-rom spline to waypoint list for smoother motion.")]
     public bool SplineMovement = true;
 
-    // Parametric constant: 0.0 for the uniform spline, 0.5 for the centripetal spline, 1.0 for the chordal spline
+    [Tooltip("Parametric constant: 0.0 for the uniform spline, 0.5 for the centripetal spline, 1.0 for the chordal spline")]
+    [Range(0.0f, 1.0f)]
     public float splineParametic  = 0.5f;
+
+    [Tooltip("Stops waypoint following")]
+    public bool Suspended = false;
+
+    public Vector3 CurrentTarget = new Vector3();
+    public List<Vector3> waypoints = new List<Vector3>();
 
     Vector3 PastTarget   = new Vector3();
     Vector3 PrevTarget   = new Vector3();
@@ -137,6 +140,7 @@ public class FollowPath : MonoBehaviour
         }
     }
 
+    [ExecuteInEditMode]
     void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
