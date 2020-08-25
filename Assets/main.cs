@@ -1,13 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using UnityEngine;
 using AStar;
+using UnityEngine.Serialization;
 using UnityEngine.SocialPlatforms;
 
+[SuppressMessage("ReSharper", "Unity.PerformanceCriticalCodeInvocation")]
 public class main : MonoBehaviour
 {
-    public GameObject CubeWallPrefab;
+    public GameObject cubeWallPrefab;
 
     // Map can be any size. Size will be calculated from the input data.
     //
@@ -51,7 +54,7 @@ public class main : MonoBehaviour
     [Range(0.4f, 1.2f)]
     [Tooltip("Adjust size of each wall block, smaller values create gaps between tiles for more retro look")]
     public float wallSizeScale = 0.9f;  // default
-    float visibleWallSizeScale;
+    private float visibleWallSizeScale;
 
     public Vector3 origin;
 
@@ -65,24 +68,17 @@ public class main : MonoBehaviour
     public bool restartPathRunner;
 
 
-    public float mapSizeUnits {
-        get { return planeUnits * mapScale; }
-    }
+    public float MapSizeUnits => planeUnits * mapScale;
 
-    public Vector3 mapGridScale {
-        get { return new Vector3(mapSizeUnits, mapSizeUnits, 1); }
-    }
-
-    public Vector3 mapGridTransToOrigin {
-        get { return new Vector3(-mapSizeUnits, -mapSizeUnits, 1); }
-    }
+    public Vector3 MapGridScale         => new Vector3( MapSizeUnits,  MapSizeUnits, 1);
+    public Vector3 MapGridTransToOrigin => new Vector3(-MapSizeUnits, -MapSizeUnits, 1);
 
     public Vector3 TranslateGridCoordToWorld(int2 coord) {
-        return origin + (Vector3.Scale(new Vector3(coord.x, coord.y, 0), mapGridTransToOrigin));
+        return origin + (Vector3.Scale(new Vector3(coord.x, coord.y, 0), MapGridTransToOrigin));
     }
 
     public Vector3 TranslateGridCoordToWorld(Vector3 coord) {
-        return origin + (Vector3.Scale(coord, mapGridTransToOrigin));
+        return origin + (Vector3.Scale(coord, MapGridTransToOrigin));
     }
 
     void SetupAvatars()
@@ -123,7 +119,7 @@ public class main : MonoBehaviour
         visibleWallSizeScale = newScale;
 
         var wallScale3 = new Vector3(visibleWallSizeScale, visibleWallSizeScale, 1);
-        var cubeScale = Vector3.Scale(Vector3.Scale(mapGridScale, wallScale3), CubeWallPrefab.transform.localScale);
+        var cubeScale = Vector3.Scale(Vector3.Scale(MapGridScale, wallScale3), cubeWallPrefab.transform.localScale);
         foreach(var item in GetLevelCubes()) {
             item.transform.localScale = cubeScale;
         }
@@ -152,7 +148,7 @@ public class main : MonoBehaviour
                 if (map[y][x] == ' ') continue;
 
                 var startpos = TranslateGridCoordToWorld(new int2(x,y));
-                var newcube = Instantiate(CubeWallPrefab, startpos, Quaternion.identity);
+                var newcube = Instantiate(cubeWallPrefab, startpos, Quaternion.identity);
                 newcube.tag = "DynamicLevelObject";
             }
         }
