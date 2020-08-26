@@ -19,17 +19,17 @@ public class FollowPath : MonoBehaviour
     [Tooltip("Stops waypoint following")]
     public bool suspended = false;
 
-    public Vector3 currentTarget = new Vector3();
-    public List<Vector3> waypoints = new List<Vector3>();
+    public Vector3 currentTarget;
+    public List<Vector3> waypoints;
 
-    Vector3 pastTarget   = new Vector3();
-    Vector3 prevTarget   = new Vector3();
-    Vector3 futureTarget = new Vector3();
+    Vector3 pastTarget   ;
+    Vector3 prevTarget   ;
+    Vector3 futureTarget ;
 
-    bool hasTarget = false;
-    bool hasPastTarget = false;
-    bool hasPrevTarget = false;
-    bool hasFutureTarget = false;
+    bool        hasTarget           = false;
+    bool        hasPastTarget       = false;
+    bool        hasPrevTarget       = false;
+    bool        hasFutureTarget     = false;
 
     public void ApplyWaypointList() {
         hasTarget = false;      // will load up new waypoint on next update.
@@ -124,7 +124,7 @@ public class FollowPath : MonoBehaviour
 
             if (splineMovement && hasFutureTarget && hasPrevTarget && hasPastTarget) {
                 var rem_dist     = Vector3.Distance(simulated_position, currentTarget);
-                var total_dist   = Vector3.Distance(starting_position, currentTarget);
+                var total_dist   = Vector3.Distance(starting_position,  currentTarget);
                 var t = 1.0f - (rem_dist / total_dist);
                 var curvepos = CatmullRom(pastTarget, prevTarget, currentTarget, futureTarget, t);
                 transform.position = curvepos; //Vector3.MoveTowards(curvepos, currentTarget, step);
