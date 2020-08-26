@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+[ExecuteInEditMode]
 public class FollowPath : MonoBehaviour
 {
     [Range(4, 32)]
@@ -48,31 +49,31 @@ public class FollowPath : MonoBehaviour
     }
 
 
-    public Vector3 CatmulRom(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float dist_pct)
+    public Vector3 CatmullRom(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float dist_pct)
     {
-        float t0 = 0.0f;
-        float t1 = GetT(t0, p0, p1);
-        float t2 = GetT(t1, p1, p2);
-        float t3 = GetT(t2, p2, p3);
+        var t0 = 0.0f;
+        var t1 = GetT(t0, p0, p1);
+        var t2 = GetT(t1, p1, p2);
+        var t3 = GetT(t2, p2, p3);
 
         // Pulled from wikipedia, modified to return a functional lerp rather than a series of segments. --jstine
 
-        float t = Mathf.Lerp(t1, t2, dist_pct);
+        var t = Mathf.Lerp(t1, t2, dist_pct);
 
-        Vector3 A1 = (t1-t)/(t1-t0)*p0 + (t-t0)/(t1-t0)*p1;
-        Vector3 A2 = (t2-t)/(t2-t1)*p1 + (t-t1)/(t2-t1)*p2;
-        Vector3 A3 = (t3-t)/(t3-t2)*p2 + (t-t2)/(t3-t2)*p3;
-        Vector3 B1 = (t2-t)/(t2-t0)*A1 + (t-t0)/(t2-t0)*A2;
-        Vector3 B2 = (t3-t)/(t3-t1)*A2 + (t-t1)/(t3-t1)*A3;
-        Vector3 C = (t2-t)/(t2-t1)*B1 + (t-t1)/(t2-t1)*B2;
+        var A1 = (t1-t)/(t1-t0)*p0 + (t-t0)/(t1-t0)*p1;
+        var A2 = (t2-t)/(t2-t1)*p1 + (t-t1)/(t2-t1)*p2;
+        var A3 = (t3-t)/(t3-t2)*p2 + (t-t2)/(t3-t2)*p3;
+        var B1 = (t2-t)/(t2-t0)*A1 + (t-t0)/(t2-t0)*A2;
+        var B2 = (t3-t)/(t3-t1)*A2 + (t-t1)/(t3-t1)*A3;
+        var C  = (t2-t)/(t2-t1)*B1 + (t-t1)/(t2-t1)*B2;
 
         return C;
     }
 
     float GetT(float t, Vector3 p0, Vector3 p1)
     {
-        float a = Mathf.Pow((p1.x-p0.x), 2.0f) + Mathf.Pow((p1.y-p0.y), 2.0f) + Mathf.Pow((p1.z-p0.z), 2.0f);
-        float b = Mathf.Pow(a, splineParametric * 0.5f);
+        var a = Mathf.Pow((p1.x-p0.x), 2.0f) + Mathf.Pow((p1.y-p0.y), 2.0f) + Mathf.Pow((p1.z-p0.z), 2.0f);
+        var b = Mathf.Pow(a, splineParametric * 0.5f);
 
         return (b + t);
     }
@@ -117,15 +118,15 @@ public class FollowPath : MonoBehaviour
         // some nominal movement speed over several frames, the illusion of consistency would be OK for the player.
 
         if (hasTarget) {
-            float step = moveSpeed * Time.deltaTime;
+            var step = moveSpeed * Time.deltaTime;
 
             simulated_position = Vector3.MoveTowards(simulated_position, currentTarget, step);
 
             if (splineMovement && hasFutureTarget && hasPrevTarget && hasPastTarget) {
-                float rem_dist     = Vector3.Distance(simulated_position, currentTarget);
-                float total_dist   = Vector3.Distance(starting_position, currentTarget);
-                float t = 1.0f - (rem_dist / total_dist);
-                var curvepos = CatmulRom(pastTarget, prevTarget, currentTarget, futureTarget, t);
+                var rem_dist     = Vector3.Distance(simulated_position, currentTarget);
+                var total_dist   = Vector3.Distance(starting_position, currentTarget);
+                var t = 1.0f - (rem_dist / total_dist);
+                var curvepos = CatmullRom(pastTarget, prevTarget, currentTarget, futureTarget, t);
                 transform.position = curvepos; //Vector3.MoveTowards(curvepos, currentTarget, step);
             }
             else {
@@ -140,7 +141,6 @@ public class FollowPath : MonoBehaviour
         }
     }
 
-    [ExecuteInEditMode]
     void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
