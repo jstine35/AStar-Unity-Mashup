@@ -4,8 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using UnityEngine;
 using AStar;
-using UnityEngine.Serialization;
-using UnityEngine.SocialPlatforms;
 
 [SuppressMessage("ReSharper", "Unity.PerformanceCriticalCodeInvocation")]
 public class main : MonoBehaviour
@@ -23,8 +21,7 @@ public class main : MonoBehaviour
     //
     // TODO: verify these assumptions when analysing input map data
 
-    string[] map = new string[]
-    {
+    string[] map = {
         "+-----------------+",
         "|                 |",
         "|             X   |",
@@ -66,8 +63,7 @@ public class main : MonoBehaviour
 
     [Tooltip("Restart the built-in path runner.")]
     public bool restartPathRunner;
-
-
+    
     public float MapSizeUnits => planeUnits * mapScale;
 
     public Vector3 MapGridScale         => new Vector3( MapSizeUnits,  MapSizeUnits, 1);
@@ -92,6 +88,10 @@ public class main : MonoBehaviour
         stickatar.transform.position = TranslateGridCoordToWorld(start);
         targatar .transform.position = TranslateGridCoordToWorld(target);
 
+        var plane = GameObject.Find("Plane");
+
+        stickatar.transform.rotation = plane.transform.rotation;
+        targatar .transform.rotation = plane.transform.rotation;
     }
 
     // Start is called before the first frame update
