@@ -6,45 +6,45 @@ using UnityEngine;
 public class FollowPath : MonoBehaviour
 {
     [Range(4, 32)]
-    public float MoveSpeed = 6.0f;
+    public float moveSpeed = 6.0f;
 
     [Tooltip("apply catmull-rom spline to waypoint list for smoother motion.")]
-    public bool SplineMovement = true;
+    public bool splineMovement = true;
 
     [Tooltip("Parametric constant: 0.0 for the uniform spline, 0.5 for the centripetal spline, 1.0 for the chordal spline")]
     [Range(0.0f, 1.0f)]
-    public float splineParametic  = 0.5f;
+    public float splineParametric  = 0.5f;
 
     [Tooltip("Stops waypoint following")]
-    public bool Suspended = false;
+    public bool suspended = false;
 
-    public Vector3 CurrentTarget = new Vector3();
+    public Vector3 currentTarget = new Vector3();
     public List<Vector3> waypoints = new List<Vector3>();
 
-    Vector3 PastTarget   = new Vector3();
-    Vector3 PrevTarget   = new Vector3();
-    Vector3 FutureTarget = new Vector3();
+    Vector3 pastTarget   = new Vector3();
+    Vector3 prevTarget   = new Vector3();
+    Vector3 futureTarget = new Vector3();
 
-    bool HasTarget = false;
-    bool HasPastTarget = false;
-    bool HasPrevTarget = false;
-    bool HasFutureTarget = false;
+    bool hasTarget = false;
+    bool hasPastTarget = false;
+    bool hasPrevTarget = false;
+    bool hasFutureTarget = false;
 
     public void ApplyWaypointList() {
-        HasTarget = false;      // will load up new waypoint on next update.
+        hasTarget = false;      // will load up new waypoint on next update.
     }
 
     public void StopMovement() {
-        Suspended = true;
-        HasPastTarget = false;
-        HasPrevTarget = false;
+        suspended = true;
+        hasPastTarget = false;
+        hasPrevTarget = false;
     }
 
     public void ClearAll() {
         waypoints.Clear();
-        HasTarget = false;
-        HasPastTarget = false;
-        HasPrevTarget = false;
+        hasTarget = false;
+        hasPastTarget = false;
+        hasPrevTarget = false;
     }
 
 
@@ -72,7 +72,7 @@ public class FollowPath : MonoBehaviour
     float GetT(float t, Vector3 p0, Vector3 p1)
     {
         float a = Mathf.Pow((p1.x-p0.x), 2.0f) + Mathf.Pow((p1.y-p0.y), 2.0f) + Mathf.Pow((p1.z-p0.z), 2.0f);
-        float b = Mathf.Pow(a, splineParametic * 0.5f);
+        float b = Mathf.Pow(a, splineParametric * 0.5f);
 
         return (b + t);
     }
@@ -83,24 +83,24 @@ public class FollowPath : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Suspended) return;
+        if (suspended) return;
 
-        if (!HasTarget) {
-            HasFutureTarget = false;
+        if (!hasTarget) {
+            hasFutureTarget = false;
 
             if (waypoints.Count > 0) {
-                PastTarget = PrevTarget;
-                PrevTarget = CurrentTarget;
-                CurrentTarget = waypoints[0];
+                pastTarget = prevTarget;
+                prevTarget = currentTarget;
+                currentTarget = waypoints[0];
                 if (waypoints.Count > 1) {
-                    HasFutureTarget = true;
-                    FutureTarget = waypoints[1];
+                    hasFutureTarget = true;
+                    futureTarget = waypoints[1];
                 }
                 waypoints.RemoveAt(0);
             }
 
-            HasTarget = true;
-            //Debug.Log($"Moving to Position: {CurrentTarget.x}, {CurrentTarget.z}");
+            hasTarget = true;
+            //Debug.Log($"Moving to Position: {currentTarget.x}, {currentTarget.z}");
             simulated_position = transform.position;
             starting_position  = transform.position;
         }
@@ -116,26 +116,26 @@ public class FollowPath : MonoBehaviour
         // could compensate on the current frame by adjusting and redoing the calculation). As long as we're within
         // some nominal movement speed over several frames, the illusion of consistency would be OK for the player.
 
-        if (HasTarget) {
-            float step = MoveSpeed * Time.deltaTime;
+        if (hasTarget) {
+            float step = moveSpeed * Time.deltaTime;
 
-            simulated_position = Vector3.MoveTowards(simulated_position, CurrentTarget, step);
+            simulated_position = Vector3.MoveTowards(simulated_position, currentTarget, step);
 
-            if (SplineMovement && HasFutureTarget && HasPrevTarget && HasPastTarget) {
-                float rem_dist     = Vector3.Distance(simulated_position, CurrentTarget);
-                float total_dist   = Vector3.Distance(starting_position, CurrentTarget);
+            if (splineMovement && hasFutureTarget && hasPrevTarget && hasPastTarget) {
+                float rem_dist     = Vector3.Distance(simulated_position, currentTarget);
+                float total_dist   = Vector3.Distance(starting_position, currentTarget);
                 float t = 1.0f - (rem_dist / total_dist);
-                var curvepos = CatmulRom(PastTarget, PrevTarget, CurrentTarget, FutureTarget, t);
-                transform.position = curvepos; //Vector3.MoveTowards(curvepos, CurrentTarget, step);
+                var curvepos = CatmulRom(pastTarget, prevTarget, currentTarget, futureTarget, t);
+                transform.position = curvepos; //Vector3.MoveTowards(curvepos, currentTarget, step);
             }
             else {
                 transform.position = simulated_position;
             }
 
-            if (Vector3.Distance(transform.position, CurrentTarget) < 0.001f) {
-                HasTarget = false;
-                HasPastTarget = HasPrevTarget;
-                HasPrevTarget = true;
+            if (Vector3.Distance(transform.position, currentTarget) < 0.001f) {
+                hasTarget = false;
+                hasPastTarget = hasPrevTarget;
+                hasPrevTarget = true;
             }
         }
     }
@@ -144,7 +144,7 @@ public class FollowPath : MonoBehaviour
     void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
-        Gizmos.DrawSphere(CurrentTarget, 1.2f);
+        Gizmos.DrawSphere(currentTarget, 1.2f);
 
         Gizmos.color = Color.yellow;
         foreach(var waypoint in waypoints) {
