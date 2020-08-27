@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -17,7 +17,7 @@ public class main : MonoBehaviour
     //  - all borders are always closed (non-traversable)
     //     - the path finder does not perform bounds checking
     //  - Only one 'A' (start) and 'B' (target) exist
-    //     - if there are multiple, the nearst to 0,0 will be used
+    //     - if there are multiple, the nearest to 0,0 will be used
     //
     // TODO: verify these assumptions when analysing input map data
 
@@ -69,12 +69,19 @@ public class main : MonoBehaviour
     public Vector3 MapGridScale         => new Vector3( MapSizeUnits,  MapSizeUnits, 1);
     public Vector3 MapGridTransToOrigin => new Vector3(-MapSizeUnits, -MapSizeUnits, 1);
 
-    public Vector3 TranslateGridCoordToWorld(int2 coord) {
-        return origin + (Vector3.Scale(new Vector3(coord.x, coord.y, 0), MapGridTransToOrigin));
+    public Vector3 TranslateGridCoordToWorld(int2 grid) {
+        return origin + (Vector3.Scale(new Vector3(grid.x, grid.y, 0), MapGridTransToOrigin));
     }
 
     public Vector3 TranslateGridCoordToWorld(Vector3 coord) {
         return origin + (Vector3.Scale(coord, MapGridTransToOrigin));
+    }
+
+    public Vector3 TranslateWorldCoordToGrid(Vector3 world)
+    {
+        
+        return Vector3.div (world - origin, Vector3.one / MapGridTransToOrigin)
+            (new Vector3(world.x, world.y, 0), MapGridTransToOrigin));
     }
 
     void SetupAvatars()
@@ -162,7 +169,6 @@ public class main : MonoBehaviour
 
         foreach (var pos in Yieldable.FindPath(map, pathstate)) {
             curpos = pos;
-            //Debug.Log($"NavPos: {curpos.x} x {curpos.y}");
         }
 
         var stickatar = GameObject.Find("Stickatar");
@@ -200,15 +206,8 @@ public class main : MonoBehaviour
         stickpath.ApplyWaypointList();
     }
 
-    // Update is called once per frame
     void Update()
     {
-#if DEBUG
-        var plane = GameObject.Find("Plane");
-        var ray = plane.transform.rotation * Vector3.up;
-        Debug.DrawLine(origin, origin + (ray * 20), Color.red);
-#endif
-
         if (rebuildMap) {
             DestroyMap();
             BuildMap();
