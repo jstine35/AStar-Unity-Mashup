@@ -9,6 +9,7 @@ using AStar;
 public class main : MonoBehaviour
 {
     public GameObject cubeWallPrefab;
+    public GameObject gameboardTransform;
 
     // Map can be any size. Size will be calculated from the input data.
     //
@@ -44,14 +45,14 @@ public class main : MonoBehaviour
         "|                 |",
         "+-----------------+",
     };
-
-    public float   planeUnits   = 10.0f;          // unit size of the default unity plane at scale=1 (TODO: calculate this at run)
-    public float   mapScale     = 0.25f;          // scalar to reduce size of map, to avoid excess unit coord size on very large maps
+    
+    [Tooltip("Size of each tile space in Unity Units")]
+    public float   tileSizeUnits = 1.0f;
 
     [Range(0.4f, 1.2f)]
     [Tooltip("Adjust size of each wall block, smaller values create gaps between tiles for more retro look")]
-    public float wallSizeScale = 0.9f;  // default
-    private float visibleWallSizeScale;
+    public float wallSizeScale = 0.9f;
+    private Vector3 visibleWallSizeScale = Vector3.negativeInfinity;    // -1 to force re-init
 
     public Vector3 origin;
 
@@ -64,10 +65,8 @@ public class main : MonoBehaviour
     [Tooltip("Restart the built-in path runner.")]
     public bool restartPathRunner;
     
-    public float MapSizeUnits => planeUnits * mapScale;
-
-    public Vector3 MapGridScale         => new Vector3( MapSizeUnits,  MapSizeUnits, 1);
-    public Vector3 MapGridTransToOrigin => new Vector3(-MapSizeUnits, -MapSizeUnits, 1);
+    public Vector3 MapGridScale         => new Vector3( tileSizeUnits,  tileSizeUnits, 1);
+    public Vector3 MapGridTransToOrigin => new Vector3(-tileSizeUnits, -tileSizeUnits, 1);
 
     public Vector3 TranslateGridCoordToWorld(int2 coord) {
         return origin + (Vector3.Scale(new Vector3(coord.x, coord.y, 0), MapGridTransToOrigin));
@@ -88,10 +87,8 @@ public class main : MonoBehaviour
         stickatar.transform.position = TranslateGridCoordToWorld(start);
         targatar .transform.position = TranslateGridCoordToWorld(target);
 
-        var plane = GameObject.Find("Plane");
-
-        stickatar.transform.rotation = plane.transform.rotation;
-        targatar .transform.rotation = plane.transform.rotation;
+        stickatar.transform.rotation = gameboardTransform.transform.rotation;
+        targatar .transform.rotation = gameboardTransform.transform.rotation;
     }
 
     // Start is called before the first frame update
@@ -115,11 +112,10 @@ public class main : MonoBehaviour
     }
 
     public void LevelScaleCubes(float newScale) {
-        if (visibleWallSizeScale == newScale) return;
-        visibleWallSizeScale = newScale;
-
-        var wallScale3 = new Vector3(visibleWallSizeScale, visibleWallSizeScale, 1);
-        var cubeScale = Vector3.Scale(Vector3.Scale(MapGridScale, wallScale3), cubeWallPrefab.transform.localScale);
+        var wallScale3 = new Vector3(newScale, newScale, 1);
+        var cubeScale = Vector3.Scale(MapGridScale, wallScale3);
+        if (visibleWallSizeScale == cubeScale) return;
+        visibleWallSizeScale = cubeScale;
         foreach(var item in GetLevelCubes()) {
             item.transform.localScale = cubeScale;
         }
@@ -127,15 +123,13 @@ public class main : MonoBehaviour
 
     public void BuildMap()
     {
-        var plane = GameObject.Find("Plane");
-        var ray = plane.transform.rotation * Vector3.up;
-        //Debug.DrawLine(Vector3.zero, ray * 10, Color.red, 6);
-
         int2 map_size = new int2 { x = map[0].Length, y = map.Length };
 
         // scale the plane so that each map unit is roughly 1 x 1 world units
-        var planeScale = new Vector3(map_size.x * mapScale, 1, map_size.y * mapScale);
+        var planeUnitsAtScale1 = 10.0f;
+        var planeScale = new Vector3(map_size.x * tileSizeUnits / planeUnitsAtScale1, 1, map_size.y * tileSizeUnits / planeUnitsAtScale1);
 
+        var plane = GameObject.Find("Plane");
         plane.transform.localScale = planeScale;
         var planeBounds = plane.GetComponent<Renderer>().bounds;
         origin = planeBounds.max;
@@ -148,7 +142,7 @@ public class main : MonoBehaviour
                 if (map[y][x] == ' ') continue;
 
                 var startpos = TranslateGridCoordToWorld(new int2(x,y));
-                var newcube = Instantiate(cubeWallPrefab, startpos, Quaternion.identity);
+                var newcube = Instantiate(cubeWallPrefab, startpos, Quaternion.identity, gameboardTransform.transform);
                 newcube.tag = "DynamicLevelObject";
             }
         }
@@ -176,7 +170,6 @@ public class main : MonoBehaviour
             backtrack = next;
         }
 
-
         var startidx = waypoints.Count-1;
         var walkstart = waypoints[startidx];
         stickpath.waypoints.Add(TranslateGridCoordToWorld(walkstart));
@@ -203,12 +196,6 @@ public class main : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-#if DEBUG
-        var plane = GameObject.Find("Plane");
-        var ray = plane.transform.rotation * Vector3.up;
-        Debug.DrawLine(origin, origin + (ray * 20), Color.red);
-#endif
-
         if (rebuildMap) {
             DestroyMap();
             BuildMap();
@@ -218,9 +205,7 @@ public class main : MonoBehaviour
             SetupAvatars();
         }
 
-        if (wallSizeScale != visibleWallSizeScale) {
-            LevelScaleCubes(wallSizeScale);
-        }
+        LevelScaleCubes(wallSizeScale);
 
         // reset button-like toggles to 0
         rebuildMap = false;
