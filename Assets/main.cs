@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -20,7 +20,7 @@ public class main : MonoBehaviour
     //  - all borders are always closed (non-traversable)
     //     - the path finder does not perform bounds checking
     //  - Only one 'A' (start) and 'B' (target) exist
-    //     - if there are multiple, the nearst to 0,0 will be used
+    //     - if there are multiple, the nearest to 0,0 will be used
     //
     // TODO: verify these assumptions when analysing input map data
 
@@ -67,12 +67,20 @@ public class main : MonoBehaviour
     [Tooltip("Restart the built-in path runner.")]
     public bool restartPathRunner;
     
-    public Vector3 MapGridScale         => new Vector3( tileSizeUnits,  tileSizeUnits, 1);
-    public Vector3 MapGridTransToOrigin => new Vector3( tileSizeUnits, -tileSizeUnits, 1);
+    public Vector3 MapGridScale            => new Vector3( tileSizeUnits,  tileSizeUnits, 1);
+    public Vector3 MapGridTransToOrigin    => new Vector3( tileSizeUnits,  tileSizeUnits, 1);
+    public Vector3 MapGridTransToOriginInv => new Vector3( 1.0f/tileSizeUnits, 1.0f/tileSizeUnits, 1);
 
     public Vector3 TranslateGridCoordToWorld(int2 coord) {
         var vec = pform_cubeWall + Vector3.Scale(new Vector3(coord.x + 0.5f, coord.y + 0.5f, 0), MapGridTransToOrigin);
-        return origin - (gameboardTransform.transform.rotation * new Vector3(vec.x, 0, vec.y) );  
+        return origin - new Vector3(vec.x, vec.y, 0);  
+    }
+
+    public Vector3 TranslateWorldCoordToGrid(Vector3 world)
+    {
+        var vec = origin - world;
+        var gridunits =  Vector3.Scale(vec, MapGridTransToOriginInv);
+        return gridunits - new Vector3(0.5f, 0.5f);
     }
 
     void SetupAvatars()
@@ -159,7 +167,6 @@ public class main : MonoBehaviour
 
         foreach (var pos in Yieldable.FindPath(map, pathstate)) {
             curpos = pos;
-            //Debug.Log($"NavPos: {curpos.x} x {curpos.y}");
         }
 
         var stickatar = GameObject.Find("Stickatar");
@@ -196,15 +203,8 @@ public class main : MonoBehaviour
         stickpath.ApplyWaypointList();
     }
 
-    // Update is called once per frame
     void Update()
     {
-#if DEBUG
-        var plane = GameObject.Find("Plane");
-        var ray = plane.transform.rotation * Vector3.up;
-        Debug.DrawLine(origin, origin + (ray * 20), Color.red);
-#endif
-
         if (rebuildMap) {
             DestroyMap();
             BuildMap();
