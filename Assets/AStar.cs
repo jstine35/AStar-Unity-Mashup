@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
+using UnityEngine;
 
 namespace AStar
 {
@@ -26,7 +28,7 @@ namespace AStar
         public int2 Parent;
     }
 
-    struct OpenListKey {
+    public struct OpenListKey {
         public int F;
         public int2 xy;
 
@@ -36,7 +38,7 @@ namespace AStar
         }
     };
 
-    public class AsciiMap {
+    public static class AsciiMap {
         public static int2 Find(string[] map, char ch) {
             int2 map_size = new int2 { x = map[0].Length, y = map.Length };
             for (int y=0; y<map_size.y; ++y) {
@@ -82,11 +84,7 @@ namespace AStar
             return ref m_tiles[pos.y, pos.x];
         }
 
-        public ref AwesomeTile this[int2 pos] {
-            get {
-                return ref m_tiles[pos.y, pos.x];
-            }
-        }
+        public ref AwesomeTile this[int2 pos] => ref m_tiles[pos.y, pos.x];
     }
 
     class OpenListComparer : IComparer<OpenListKey>
@@ -106,7 +104,7 @@ namespace AStar
         }
     };
 
-    public class Yieldable {
+    public static class Yieldable {
         public class PathState {
             public InternalMap internal_map;
         };
@@ -142,14 +140,20 @@ namespace AStar
         }
 
         public static IEnumerable<int2> FindPath(string[] map, PathState pathstate) {
+            var start  = AsciiMap.Find(map, 'A');
+            var target = AsciiMap.Find(map, 'B');
+            return FindPath(map, pathstate, start, target);
+        }
+
+        public static IEnumerable<int2> FindPath(string[] map, PathState pathstate, int2 start, int2 target) {
             int2 map_size = new int2 { x = map[0].Length, y = map.Length };
             int map_size_in_tiles = map_size.y * map_size.x;
-            pathstate.internal_map = new InternalMap(map_size);
+            if (pathstate.internal_map is null) {
+                pathstate.internal_map = new InternalMap(map_size);
+            }
 
             var internalMap = pathstate.internal_map;
             var curpos = new int2();
-            var start  = AsciiMap.Find(map, 'A');
-            var target = AsciiMap.Find(map, 'B');
             var openList = new SortedList<OpenListKey, int>(map_size_in_tiles, new OpenListComparer());
 
             // start by adding the original position to the open list

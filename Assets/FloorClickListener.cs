@@ -18,7 +18,9 @@ public class FloorClickListener : MonoBehaviour
             var main = GameObject.Find("SystemInit").GetComponent<main>();
             var coord = main.TranslateWorldCoordToGrid(hitPoint);
             
-            Debug.Log($"Clicked: {coord}");
+            var stickatar = GameObject.Find("Stickatar");
+            
+            //stickatar.GetComponent<FollowPath>().ApplyWaypointList();
             
             // Move cube GameObject to the point clicked
             // m_Cube.transform.position = hitPoint;
