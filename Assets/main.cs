@@ -6,7 +6,10 @@ using UnityEngine;
 using AStar;
 using UnityEditor;
 
-[SuppressMessage("ReSharper", "Unity.PerformanceCriticalCodeInvocation")]
+public static class GlobalPathState {
+    public static Yieldable.PathState state;
+}
+
 public class main : MonoBehaviour
 {
     public GameObject cubeWallPrefab;
@@ -24,7 +27,7 @@ public class main : MonoBehaviour
     //
     // TODO: verify these assumptions when analysing input map data
 
-    string[] map = {
+    public string[] map = {
         "+-----------------+",
         "|                 |",
         "|             X   |",

@@ -48,6 +48,17 @@ public class FollowPath : MonoBehaviour
         hasPrevTarget = false;
     }
 
+    // returns current/nearest position in the 2D path finding grid.
+    public Vector2Int GetMapPos2D() {
+           return new Vector2Int();
+        // cast a ray from the current position toward the gameboard plane.
+        // Determine intersection point and pass through TranslateWorldCoordToGrid()
+        
+        //var plane = new Plane(gameObject.transform.up, gameObject.transform.position);
+        //gameObject.transform.
+        //var main = GameObject.Find("SystemInit").GetComponent<main>();
+        //main.TranslateWorldCoordToGrid();
+    }
 
     public Vector3 CatmullRom(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float dist_pct)
     {
