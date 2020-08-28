@@ -33,6 +33,8 @@ public class FollowPath : MonoBehaviour
 
     public void ApplyWaypointList() {
         hasTarget = false;      // will load up new waypoint on next update.
+        hasPastTarget = false;
+        hasPrevTarget = false;
     }
 
     public void StopMovement() {
@@ -48,9 +50,23 @@ public class FollowPath : MonoBehaviour
         hasPrevTarget = false;
     }
 
+    // returns current/nearest position in the 2D path finding grid.
+    public Vector2Int GetMapPos2D() {
+           return new Vector2Int();
+        // cast a ray from the current position toward the gameboard plane.
+        // Determine intersection point and pass through TranslateWorldCoordToGrid()
+        
+        //var plane = new Plane(gameObject.transform.up, gameObject.transform.position);
+        //gameObject.transform.
+        //var main = GameObject.Find("SystemInit").GetComponent<main>();
+        //main.TranslateWorldCoordToGrid();
+    }
 
     public Vector3 CatmullRom(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float dist_pct)
     {
+        if (dist_pct >= 1.0) return p2;
+        if (dist_pct <= 0.0) return p1;
+
         var t0 = 0.0f;
         var t1 = GetT(t0, p0, p1);
         var t2 = GetT(t1, p1, p2);
@@ -98,12 +114,18 @@ public class FollowPath : MonoBehaviour
                     futureTarget = waypoints[1];
                 }
                 waypoints.RemoveAt(0);
-            }
+                hasTarget = true;
 
-            hasTarget = true;
-            //Debug.Log($"Moving to Position: {currentTarget.x}, {currentTarget.z}");
-            simulated_position = transform.position;
-            starting_position  = transform.position;
+                //Debug.Log($"Moving to Position: {currentTarget.x}, {currentTarget.z}");
+                simulated_position = transform.position;
+                starting_position  = transform.position;
+            }
+        }
+        
+        if (!hasTarget) {
+            hasPastTarget = false;
+            hasPrevTarget = false;
+            return;
         }
 
         // Movement smoothing.
@@ -117,27 +139,25 @@ public class FollowPath : MonoBehaviour
         // could compensate on the current frame by adjusting and redoing the calculation). As long as we're within
         // some nominal movement speed over several frames, the illusion of consistency would be OK for the player.
 
-        if (hasTarget) {
-            var step = moveSpeed * Time.deltaTime;
+        var step = moveSpeed * Time.deltaTime;
 
-            simulated_position = Vector3.MoveTowards(simulated_position, currentTarget, step);
+        simulated_position = Vector3.MoveTowards(simulated_position, currentTarget, step);
 
-            if (splineMovement && hasFutureTarget && hasPrevTarget && hasPastTarget) {
-                var rem_dist     = Vector3.Distance(simulated_position, currentTarget);
-                var total_dist   = Vector3.Distance(starting_position,  currentTarget);
-                var t = 1.0f - (rem_dist / total_dist);
-                var curvepos = CatmullRom(pastTarget, prevTarget, currentTarget, futureTarget, t);
-                transform.position = curvepos; //Vector3.MoveTowards(curvepos, currentTarget, step);
-            }
-            else {
-                transform.position = simulated_position;
-            }
+        if (splineMovement && hasFutureTarget && hasPrevTarget && hasPastTarget) {
+            var rem_dist     = Vector3.Distance(simulated_position, currentTarget);
+            var total_dist   = Vector3.Distance(starting_position,  currentTarget);
+            var t = 1.0f - (rem_dist / total_dist);
+            var curvepos = CatmullRom(pastTarget, prevTarget, currentTarget, futureTarget, t);
+            transform.position = curvepos; //Vector3.MoveTowards(curvepos, currentTarget, step);
+        }
+        else {
+            transform.position = simulated_position;
+        }
 
-            if (Vector3.Distance(transform.position, currentTarget) < 0.001f) {
-                hasTarget = false;
-                hasPastTarget = hasPrevTarget;
-                hasPrevTarget = true;
-            }
+        if (Vector3.Distance(transform.position, currentTarget) < 0.001f) {
+            hasTarget = false;
+            hasPastTarget = hasPrevTarget;
+            hasPrevTarget = true;
         }
     }
 

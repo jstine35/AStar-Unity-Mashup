@@ -85,6 +85,10 @@ namespace AStar
         }
 
         public ref AwesomeTile this[int2 pos] => ref m_tiles[pos.y, pos.x];
+        
+        public void clear() {
+            Array.Clear(m_tiles, 0, m_tiles.Length);
+        }
     }
 
     class OpenListComparer : IComparer<OpenListKey>
@@ -150,6 +154,9 @@ namespace AStar
             int map_size_in_tiles = map_size.y * map_size.x;
             if (pathstate.internal_map is null) {
                 pathstate.internal_map = new InternalMap(map_size);
+            }
+            else {
+                pathstate.internal_map.clear();
             }
 
             var internalMap = pathstate.internal_map;

@@ -6,25 +6,10 @@ using UnityEngine;
 using AStar;
 using UnityEditor;
 
-[SuppressMessage("ReSharper", "Unity.PerformanceCriticalCodeInvocation")]
-public class main : MonoBehaviour
-{
-    public GameObject cubeWallPrefab;
-    public GameObject gameboardTransform;
-    Vector3 pform_cubeWall;        // position transform for cubeWalls
-
-    // Map can be any size. Size will be calculated from the input data.
-    //
-    // Pathing Assumptions and Map Requirements:
-    //  - all rows are of equal length
-    //  - all borders are always closed (non-traversable)
-    //     - the path finder does not perform bounds checking
-    //  - Only one 'A' (start) and 'B' (target) exist
-    //     - if there are multiple, the nearest to 0,0 will be used
-    //
-    // TODO: verify these assumptions when analysing input map data
-
-    string[] map = {
+public static class GlobalPool {
+    public static Yieldable.PathState yieldablePathState = new Yieldable.PathState();
+    public static List<int2> yPathWaypoints = new List<int2>(48);
+    public static string[] map = {
         "+-----------------+",
         "|                 |",
         "|             X   |",
@@ -47,6 +32,57 @@ public class main : MonoBehaviour
         "|                 |",
         "+-----------------+",
     };
+
+    public static void AppendWaypoints(IEnumerable<int2> yieldable_path) {
+        YPath.AppendWaypoints(yieldable_path, ref yPathWaypoints);
+    }
+ }
+
+public static class YPath {
+    //public static void BuildWaypointsList(IEnumerable<int2> yieldable_path) {
+    //    AppendWaypoints(yieldable_path, ref GlobalPool.yPathWaypoints);
+    //}
+
+    public static void AppendWaypoints(IEnumerable<int2> yieldable_path) {
+        AppendWaypoints(yieldable_path, ref GlobalPool.yPathWaypoints);
+    }
+
+    public static void AppendWaypoints(IEnumerable<int2> yieldable_path, ref List<int2> waypoints) {
+        if (waypoints is null) {
+            waypoints = new List<int2>(48);
+        }
+        var curpos = new int2();
+
+        foreach (var pos in yieldable_path) {
+            curpos = pos;
+        }
+        var backtrack = curpos;
+        
+        var pathstate = GlobalPool.yieldablePathState;
+        while (!backtrack.equal0()) {
+            var next = pathstate.internal_map[backtrack].Parent;
+            waypoints.Add(backtrack);
+            backtrack = next;
+        }
+    }
+}
+
+public class main : MonoBehaviour
+{
+    public GameObject cubeWallPrefab;
+    public GameObject gameboardTransform;
+    Vector3 pform_cubeWall;        // position transform for cubeWalls
+
+    // Map can be any size. Size will be calculated from the input data.
+    //
+    // Pathing Assumptions and Map Requirements:
+    //  - all rows are of equal length
+    //  - all borders are always closed (non-traversable)
+    //     - the path finder does not perform bounds checking
+    //  - Only one 'A' (start) and 'B' (target) exist
+    //     - if there are multiple, the nearest to 0,0 will be used
+    //
+    // TODO: verify these assumptions when analysing input map data
     
     [Tooltip("Size of each tile space in Unity Units")]
     public float   tileSizeUnits = 1.0f;
@@ -67,9 +103,11 @@ public class main : MonoBehaviour
     [Tooltip("Restart the built-in path runner.")]
     public bool restartPathRunner;
     
-    public Vector3 MapGridScale            => new Vector3( tileSizeUnits,  tileSizeUnits, 1);
-    public Vector3 MapGridTransToOrigin    => new Vector3( tileSizeUnits,  tileSizeUnits, 1);
-    public Vector3 MapGridTransToOriginInv => new Vector3( 1.0f/tileSizeUnits, 1.0f/tileSizeUnits, 1);
+    public Vector3 MapGridScale            => new Vector3(tileSizeUnits,  tileSizeUnits, 1);
+    public Vector3 MapGridTransToOrigin    => new Vector3(tileSizeUnits,  tileSizeUnits, 1);
+    public Vector3 MapGridTransToOriginInv => new Vector3(1.0f/tileSizeUnits, 1.0f/tileSizeUnits, 1);
+
+    public string[] map = GlobalPool.map;
 
     public Vector3 TranslateGridCoordToWorld(int2 coord) {
         var vec = pform_cubeWall + Vector3.Scale(new Vector3(coord.x + 0.5f, coord.y + 0.5f, 0), MapGridTransToOrigin);
