@@ -36,7 +36,7 @@ public static class GlobalPool {
     public static void AppendWaypoints(IEnumerable<int2> yieldable_path) {
         YPath.AppendWaypoints(yieldable_path, ref yPathWaypoints);
     }
- }
+}
 
 public static class YPath {
     //public static void BuildWaypointsList(IEnumerable<int2> yieldable_path) {
@@ -71,6 +71,8 @@ public class main : MonoBehaviour
 {
     public GameObject cubeWallPrefab;
     public GameObject gameboardTransform;
+    public GameObject tileSelectorPrefab;
+        
     Vector3 pform_cubeWall;        // position transform for cubeWalls
 
     // Map can be any size. Size will be calculated from the input data.
@@ -108,17 +110,20 @@ public class main : MonoBehaviour
     public Vector3 MapGridTransToOriginInv => new Vector3(1.0f/tileSizeUnits, 1.0f/tileSizeUnits, 1);
 
     public string[] map = GlobalPool.map;
+    
+    public static GameObject tileSelector;
+
 
     public Vector3 TranslateGridCoordToWorld(int2 coord) {
         var vec = pform_cubeWall + Vector3.Scale(new Vector3(coord.x + 0.5f, coord.y + 0.5f, 0), MapGridTransToOrigin);
-        return origin - new Vector3(vec.x, vec.y, 0);  
+        return origin + new Vector3(vec.x, vec.y, 0);  
     }
 
     public Vector3 TranslateWorldCoordToGrid(Vector3 world)
     {
-        var vec = origin - world;
+        var vec = world - origin;
         var gridunits =  Vector3.Scale(vec, MapGridTransToOriginInv);
-        return gridunits - new Vector3(0.5f, 0.5f);
+        return gridunits; // - new Vector3(0.5f, 0.5f);
     }
 
     void SetupAvatars()
@@ -132,15 +137,18 @@ public class main : MonoBehaviour
         stickatar.transform.parent = gameboardTransform.transform;
         targatar .transform.parent = gameboardTransform.transform;
         
-        stickatar.transform.position = TranslateGridCoordToWorld(start);
-        targatar .transform.position = TranslateGridCoordToWorld(target);
+        stickatar.transform.localPosition = TranslateGridCoordToWorld(start);
+        targatar .transform.localPosition = TranslateGridCoordToWorld(target);
 
-        stickatar.transform.rotation = gameboardTransform.transform.rotation;
-        targatar .transform.rotation = gameboardTransform.transform.rotation;
+        //stickatar.transform.localRotation = gameboardTransform.transform.rotation;
+        //targatar .transform.localRotation = gameboardTransform.transform.rotation;
+        //stickatar.transform.localRotation = Quaternion.identity;
+        //targatar .transform.localRotation = Quaternion.identity;
     }
 
     void Start()
     {
+        tileSelector = GameObject.Instantiate(tileSelectorPrefab, gameboardTransform.transform);
         pform_cubeWall = new Vector3(0, 0, cubeWallPrefab.GetComponent<Renderer>().bounds.extents.z);
 
         BuildMap();
@@ -168,6 +176,7 @@ public class main : MonoBehaviour
         foreach(var item in GetLevelCubes()) {
             item.transform.localScale = cubeScale;
         }
+        tileSelector.transform.localScale = new Vector3(tileSizeUnits, tileSizeUnits * tileSelectorPrefab.transform.localScale.y, tileSizeUnits);
     }
 
     public void BuildMap()
@@ -175,13 +184,13 @@ public class main : MonoBehaviour
         int2 map_size = new int2 { x = map[0].Length, y = map.Length };
 
         // scale the plane so that each map unit is roughly 1 x 1 world units
-        var planeUnitsAtScale1 = 10.0f;
-        var planeScale = new Vector3(map_size.x * tileSizeUnits / planeUnitsAtScale1, 1, map_size.y * tileSizeUnits / planeUnitsAtScale1);
+        var planeUnitsAtScale1 = 1.0f;
+        var planeScale = new Vector3(map_size.x * tileSizeUnits / planeUnitsAtScale1, map_size.y * tileSizeUnits / planeUnitsAtScale1, 1);
 
-        var plane = GameObject.Find("Plane");
+        var plane = GameObject.Find("FloorQuad");
         plane.transform.localScale = planeScale;
-        var planeBounds = plane.GetComponent<Renderer>().bounds;
-        origin = planeBounds.max;
+        origin = (planeScale * 0.5f) - planeScale;
+        origin.z = 0;
 
         Debug.Log($"origin = {origin}");
 
@@ -191,8 +200,12 @@ public class main : MonoBehaviour
                 if (map[y][x] == ' ') continue;
 
                 var startpos = TranslateGridCoordToWorld(new int2(x,y));
-                var newcube  = Instantiate(cubeWallPrefab, startpos, Quaternion.identity, gameboardTransform.transform);
-                newcube.tag = "DynamicLevelObject";
+                startpos.z -= 2;
+                //Quaternion.AngleAxis(90, Vector3.right) 
+                var newcube  = Instantiate(cubeWallPrefab, gameboardTransform.transform);
+                newcube.transform.localPosition = startpos;
+                newcube.transform.localRotation = Quaternion.identity; // Quaternion.AngleAxis(90, Vector3.right);
+                newcube.tag                     = "DynamicLevelObject";
             }
         }
         LevelScaleCubes(wallSizeScale);

@@ -117,8 +117,8 @@ public class FollowPath : MonoBehaviour
                 hasTarget = true;
 
                 //Debug.Log($"Moving to Position: {currentTarget.x}, {currentTarget.z}");
-                simulated_position = transform.position;
-                starting_position  = transform.position;
+                simulated_position = transform.localPosition;
+                starting_position  = transform.localPosition;
             }
         }
         
@@ -148,13 +148,13 @@ public class FollowPath : MonoBehaviour
             var total_dist   = Vector3.Distance(starting_position,  currentTarget);
             var t = 1.0f - (rem_dist / total_dist);
             var curvepos = CatmullRom(pastTarget, prevTarget, currentTarget, futureTarget, t);
-            transform.position = curvepos; //Vector3.MoveTowards(curvepos, currentTarget, step);
+            transform.localPosition = curvepos; //Vector3.MoveTowards(curvepos, currentTarget, step);
         }
         else {
-            transform.position = simulated_position;
+            transform.localPosition = simulated_position;
         }
 
-        if (Vector3.Distance(transform.position, currentTarget) < 0.001f) {
+        if (Vector3.Distance(transform.localPosition, currentTarget) < 0.001f) {
             hasTarget = false;
             hasPastTarget = hasPrevTarget;
             hasPrevTarget = true;
@@ -164,11 +164,11 @@ public class FollowPath : MonoBehaviour
     void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
-        Gizmos.DrawSphere(currentTarget, 1.2f);
-
+        Gizmos.DrawSphere(transform.parent.TransformPoint(currentTarget), 1.2f);
+        
         Gizmos.color = Color.yellow;
         foreach(var waypoint in waypoints) {
-            Gizmos.DrawSphere(waypoint, 0.4f);
+            Gizmos.DrawSphere(transform.parent.TransformPoint(waypoint), 0.4f);
         }
     }
 
