@@ -103,8 +103,36 @@ public class FloorClickListener : MonoBehaviour
     Vector3 dbg_rayorigin;
     Vector3 dbg_raydir;
 
+    bool    lastMouseIsSpinning = false;
+    Vector3 lastMouseSpinViewPos;
+    Vector3 spinOrient;
+
     void Update()
     {
+        bool doSpin = false;
+        if (Input.GetKey("left ctrl")) {
+            if (Input.GetMouseButton(0)) {
+                doSpin = true;
+
+                var xform = GameObject.Find("GameBoardTransform");
+
+                if (!lastMouseIsSpinning) {
+                    lastMouseIsSpinning = true;
+                    spinOrient = xform.transform.localRotation.eulerAngles;
+                }
+                else {
+                    var delta = Input.mousePosition - lastMouseSpinViewPos;
+                    spinOrient.z += delta.x / 6;
+                    spinOrient.x = Mathf.Clamp(spinOrient.x + (delta.y / 16), 30, 60);
+                    spinOrient.y = Mathf.Clamp(spinOrient.y - (delta.y / 16), -40, -20);
+                    xform.transform.localRotation = Quaternion.Euler(spinOrient);  //Quaternion.Euler(0, 0, delta.x / 6);
+                    //Debug.Log("Key is pressed.");
+                }
+                lastMouseSpinViewPos = Input.mousePosition;
+            }
+        }
+        lastMouseIsSpinning = doSpin;
+    
         var cam = Camera.main; 
         if (cam is null) return;
 
