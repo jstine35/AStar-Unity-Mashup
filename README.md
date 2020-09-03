@@ -4,6 +4,12 @@ This project does not use Unity's built-in `NavMesh`, instead using a home-grown
 
 This project is currently not "playable" in any sense of the word. It is a technical demo, until further notice (probably forever).
 
+## Latest awesome gif-animated visuals
+
+![Rotation in Isometric View](https://raw.githubusercontent.com/wiki/jstine35/AStar-Unity-Mashup/images/astar-rotation-overlay.gif)
+
+I threw a fairly pointless user control hint up, mostly to familiarizew with Unity UI Panels and TextMeshPro.
+
 ## Why... ?
 
 This started as a by-request interview test. Afterward I decided to make a best effort to turn it into something more portfolio-suitable. It now serves as an
