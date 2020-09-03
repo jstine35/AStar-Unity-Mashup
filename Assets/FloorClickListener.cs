@@ -71,10 +71,6 @@ public class FloorClickListener : MonoBehaviour
         }
     }
 
-    void Start()
-    {
-    }
-
 #if false
     void OnDrawGizmos()
     {
@@ -106,15 +102,73 @@ public class FloorClickListener : MonoBehaviour
     bool    lastMouseIsSpinning = false;
     Vector3 lastMouseSpinViewPos;
     Vector3 spinOrient;
+    
+    public enum ZoomViewAngle {
+        LowPersp,
+        HighPersp,
+    }
+    
+    [Range(1.0f, 3.0f)]
+    public int ZoomLevel;
+    public ZoomViewAngle ZoomAngle;
+
+    public float RotationSpeed = 120.0f;
+    public Vector2 PerspectiveAnglesLo = new Vector2(50.0f, -36.0f);
+    public Vector2 PerspectiveAnglesHi = new Vector2(30.0f, -18.0f);
+    
+    Vector2 persp_angles_curr;
+    Vector2 persp_angles_targ;
+    
+    void Start()
+    {
+        switch(ZoomAngle) {
+            case ZoomViewAngle.LowPersp : persp_angles_curr = new Vector2(30, -30) ; break;
+            case ZoomViewAngle.HighPersp: persp_angles_curr = new Vector2(50, -40) ; break;
+        }
+
+        // TODO: attach rotation things directly to GameBoardTransform.
+        var xform = GameObject.Find("GameBoardTransform");
+
+        persp_angles_targ = persp_angles_curr;
+        var angles = xform.transform.localRotation.eulerAngles;
+        xform.transform.localRotation = Quaternion.Euler(persp_angles_curr.x, persp_angles_curr.y, angles.z);
+    }
 
     void Update()
     {
         bool doSpin = false;
+        if (Input.GetKeyDown("z")) {
+            ZoomLevel = (ZoomLevel % 3) + 1; 
+        }
+
+        // TODO: attach rotation things directly to GameBoardTransform.
+        var xform = GameObject.Find("GameBoardTransform");
+
+        if (Input.GetKeyDown("x")) {
+            switch(ZoomAngle) {
+                case ZoomViewAngle.LowPersp : ZoomAngle = ZoomViewAngle.HighPersp; break;
+                case ZoomViewAngle.HighPersp: ZoomAngle = ZoomViewAngle.LowPersp ; break;
+            }
+            
+            switch(ZoomAngle) {
+                case ZoomViewAngle.LowPersp  : persp_angles_targ = new Vector2(30, -30); break;
+                case ZoomViewAngle.HighPersp : persp_angles_targ = new Vector2(50, -40); break;
+            }
+        }
+        
+        if (persp_angles_targ != persp_angles_curr) {
+            persp_angles_curr = Vector2.MoveTowards(persp_angles_curr, persp_angles_targ, RotationSpeed * Time.deltaTime);
+            var angles = xform.transform.localRotation.eulerAngles;
+            xform.transform.localRotation = Quaternion.Euler(persp_angles_curr.x, persp_angles_curr.y, angles.z);
+            
+            if (Vector2.Distance(persp_angles_curr, persp_angles_targ) < 0.01f) {
+                persp_angles_curr = persp_angles_targ;
+            }
+        }
+
         if (Input.GetKey("left ctrl")) {
             if (Input.GetMouseButton(0)) {
                 doSpin = true;
-
-                var xform = GameObject.Find("GameBoardTransform");
 
                 if (!lastMouseIsSpinning) {
                     lastMouseIsSpinning = true;
@@ -123,10 +177,7 @@ public class FloorClickListener : MonoBehaviour
                 else {
                     var delta = Input.mousePosition - lastMouseSpinViewPos;
                     spinOrient.z += delta.x / 6;
-                    spinOrient.x = Mathf.Clamp(spinOrient.x + (delta.y / 16), 30, 60);
-                    spinOrient.y = Mathf.Clamp(spinOrient.y - (delta.y / 16), -40, -20);
-                    xform.transform.localRotation = Quaternion.Euler(spinOrient);  //Quaternion.Euler(0, 0, delta.x / 6);
-                    //Debug.Log("Key is pressed.");
+                    xform.transform.localRotation = Quaternion.Euler(spinOrient);
                 }
                 lastMouseSpinViewPos = Input.mousePosition;
             }
