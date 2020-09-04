@@ -1104,8 +1104,8 @@ MonoBehaviour:
   ZoomLevel: 0
   ZoomAngle: 0
   RotationSpeed: 120
-  PerspectiveAnglesLo: {x: 0, y: 0}
-  PerspectiveAnglesHi: {x: 0, y: 0}
+  PerspectiveAnglesLo: {x: 50, y: -36}
+  PerspectiveAnglesHi: {x: 30, y: -18}
 --- !u!1001 &2135709810
 PrefabInstance:
   m_ObjectHideFlags: 0
