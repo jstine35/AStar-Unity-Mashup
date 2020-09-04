@@ -547,6 +547,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 686198534}
+  - component: {fileID: 686198535}
   m_Layer: 0
   m_Name: GameBoardTransform
   m_TagString: Untagged
@@ -571,6 +572,23 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 50, y: -40, z: 18}
+--- !u!114 &686198535
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 686198533}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09acbb99e2a950a4898d524b4aa22fe0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ZoomLevel: 0
+  ZoomAngle: 0
+  RotationSpeed: 120
+  PerspectiveAnglesLo: {x: 50, y: -36}
+  PerspectiveAnglesHi: {x: 30, y: -18}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -1101,11 +1119,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8404e55ff0a89d4a95f11e8fac069f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ZoomLevel: 0
-  ZoomAngle: 0
-  RotationSpeed: 120
-  PerspectiveAnglesLo: {x: 50, y: -36}
-  PerspectiveAnglesHi: {x: 30, y: -18}
 --- !u!1001 &2135709810
 PrefabInstance:
   m_ObjectHideFlags: 0
