@@ -1,6 +1,6 @@
-# AStar-Unity-Mashup
+# Stickatar
 
-This project does not use Unity's built-in `NavMesh`, instead using a home-grown A* algo.
+**Stickatar** definition: A heroic figure of both stick and avatar.
 
 This project is currently not "playable" in any sense of the word. It is a technical demo, until further notice (probably forever).
 
