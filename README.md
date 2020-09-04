@@ -6,9 +6,9 @@ This project is currently not "playable" in any sense of the word. It is a techn
 
 ## Latest awesome gif-animated visuals
 
+20200903- I threw a fairly pointless user control hint up, mostly to familiarize with Unity UI Panels and TextMeshPro.
 ![Rotation in Isometric View](https://raw.githubusercontent.com/wiki/jstine35/AStar-Unity-Mashup/images/astar-rotation-overlay.gif)
 
-I threw a fairly pointless user control hint up, mostly to familiarizew with Unity UI Panels and TextMeshPro.
 
 ## Why... ?
 
