@@ -46,6 +46,16 @@ public class SpinZoomListener : MonoBehaviour
             ZoomLevel = (ZoomLevel % 3) + 1; 
         }
 
+        var cam = Camera.main; 
+        if (cam != null) {
+            ZoomLevel = Mathf.Clamp(ZoomLevel, 1, 3);
+            switch(ZoomLevel) {
+                case 1: cam.orthographicSize = 36; break;
+                case 2: cam.orthographicSize = 26; break;
+                case 3: cam.orthographicSize = 18; break;
+            }
+        }
+
         var xform = gameObject.transform;
 
         if (Input.GetKeyDown("x")) {

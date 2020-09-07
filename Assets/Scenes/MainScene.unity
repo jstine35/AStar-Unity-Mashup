@@ -584,7 +584,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09acbb99e2a950a4898d524b4aa22fe0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ZoomLevel: 0
+  ZoomLevel: 1
   ZoomAngle: 0
   RotationSpeed: 120
   PerspectiveAnglesLo: {x: 50, y: -36}
@@ -830,6 +830,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1096255668}
   - component: {fileID: 1096255667}
+  - component: {fileID: 1096255669}
   m_Layer: 0
   m_Name: SystemInit
   m_TagString: Untagged
@@ -893,6 +894,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1096255669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1096255666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e39631f6b4f5bb740afa3e1845495075, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1701612287
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1009,6 +1022,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: CtrlMouseSpinTip
+      objectReference: {fileID: 0}
+    - target: {fileID: 6574767004685065123, guid: e7a8a11efe348004b9e8b030fbb5c5a3,
+        type: 3}
+      propertyPath: m_PixelPerfect
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e7a8a11efe348004b9e8b030fbb5c5a3, type: 3}
