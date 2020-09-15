@@ -3,14 +3,25 @@ using System.Collections.Generic;
 using AStar;
 using UnityEngine;
 
+// TODO: Upgrade this to use IPointerClickHandler after upgrading to Unity 2019.
+
 public class FloorClickListener : MonoBehaviour
 {
+    void OnMouseOver() {
+        if (Input.GetMouseButtonDown(1)) {
+            // handle left click.
+        }
+    }
+
     void OnMouseDown()
     {
+        if (Input.GetKey("left ctrl")) return;
+
         var cam = Camera.main; 
         if (cam is null) return;
 
         var msepos = Input.mousePosition;
+
         if(cam.orthographic) {
             msepos.z = 0;
         }
