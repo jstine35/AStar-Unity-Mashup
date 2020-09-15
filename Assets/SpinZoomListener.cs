@@ -36,6 +36,8 @@ public class SpinZoomListener : MonoBehaviour
         persp_angles_targ = persp_angles_curr;
         var angles = xform.localRotation.eulerAngles;
         xform.localRotation = Quaternion.Euler(persp_angles_curr.x, persp_angles_curr.y, angles.z);
+
+        Physics.gravity = gameObject.transform.TransformDirection(new Vector3(0,0,1));
     }
 
     // Update is called once per frame
