@@ -66,8 +66,6 @@ public class main : MonoBehaviour
     public GameObject tileSelectorPrefab;
     public GameObject gameboardTransform;
         
-    Vector3 pform_cubeWall;        // position transform for cubeWalls
-
     // Map can be any size. Size will be calculated from the input data.
     //
     // Pathing Assumptions and Map Requirements:
@@ -112,7 +110,7 @@ public class main : MonoBehaviour
     private string[] map = GlobalPool.map;
 
     public Vector3 TranslateGridCoordToWorld(int2 coord) {
-        var vec = pform_cubeWall + Vector3.Scale(new Vector3(coord.x + 0.5f, coord.y + 0.5f, 0), MapGridTransToOrigin);
+        var vec = Vector3.Scale(new Vector3(coord.x + 0.5f, coord.y + 0.5f, 0), MapGridTransToOrigin);
         return origin + new Vector3(vec.x, vec.y, 0);  
     }
 
@@ -135,11 +133,6 @@ public class main : MonoBehaviour
         
         stickatar.transform.localPosition = TranslateGridCoordToWorld(start);
         targatar .transform.localPosition = TranslateGridCoordToWorld(target);
-
-        //stickatar.transform.localRotation = gameboardTransform.transform.rotation;
-        //targatar .transform.localRotation = gameboardTransform.transform.rotation;
-        //stickatar.transform.localRotation = Quaternion.identity;
-        //targatar .transform.localRotation = Quaternion.identity;
     }
 
     bool IsMapChanged(string[] dest, IList<string> src) {
@@ -197,7 +190,6 @@ public class main : MonoBehaviour
     void Start()
     {
         tileSelector = GameObject.Instantiate(tileSelectorPrefab, gameboardTransform.transform);
-        pform_cubeWall = new Vector3(0, 0, cubeWallPrefab.GetComponent<Renderer>().bounds.extents.z);
 
         ReloadMaps();
         BuildMap();
@@ -279,8 +271,7 @@ public class main : MonoBehaviour
                 if (map[y][x] == ' ') continue;
 
                 var startpos = TranslateGridCoordToWorld(new int2(x,y));
-                startpos.z -= cubeWallPrefab.transform.localScale.z * 0.40f;
-                //Quaternion.AngleAxis(90, Vector3.right) 
+                startpos.z -= cubeWallPrefab.transform.localScale.z * 0.50f;        // to workaround the origin of cubeWallPrefab being centered rather than at the foot/base of the model
                 var newcube  = Instantiate(cubeWallPrefab, gameboardTransform.transform);
                 GlobalPool.floors[0].walls.Add(newcube);
                 newcube.transform.localPosition = startpos;
