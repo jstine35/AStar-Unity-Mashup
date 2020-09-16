@@ -36,7 +36,6 @@ public class SpinZoomListener : MonoBehaviour
         persp_angles_targ = persp_angles_curr;
         var angles = xform.localRotation.eulerAngles;
         xform.localRotation = Quaternion.Euler(persp_angles_curr.x, persp_angles_curr.y, angles.z);
-
         Physics.gravity = gameObject.transform.TransformDirection(new Vector3(0,0,1));
     }
 
@@ -76,7 +75,8 @@ public class SpinZoomListener : MonoBehaviour
             persp_angles_curr = Vector2.MoveTowards(persp_angles_curr, persp_angles_targ, RotationSpeed * Time.deltaTime);
             var angles = xform.transform.localRotation.eulerAngles;
             xform.transform.localRotation = Quaternion.Euler(persp_angles_curr.x, persp_angles_curr.y, angles.z);
-            
+            Physics.gravity = gameObject.transform.TransformDirection(new Vector3(0,0,1));
+
             if (Vector2.Distance(persp_angles_curr, persp_angles_targ) < 0.01f) {
                 persp_angles_curr = persp_angles_targ;
             }
@@ -94,6 +94,7 @@ public class SpinZoomListener : MonoBehaviour
                     var delta = Input.mousePosition - lastMouseSpinViewPos;
                     spinOrient.z += delta.x / 6;
                     xform.transform.localRotation = Quaternion.Euler(spinOrient);
+                    Physics.gravity = gameObject.transform.TransformDirection(new Vector3(0,0,1));
                 }
                 lastMouseSpinViewPos = Input.mousePosition;
             }
