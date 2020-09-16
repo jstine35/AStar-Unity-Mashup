@@ -14,6 +14,7 @@ public static class Extensions {
 }
 
 public class FloorZone {
+    public GameObject       gameBoard;
     public GameObject       floor;
     public List<GameObject> walls = new List<GameObject>();
 }
@@ -85,7 +86,7 @@ public class main : MonoBehaviour
     public float wallSizeScale = 0.9f;
     private Vector3 visibleWallSizeScale = Vector3.negativeInfinity;    // -1 to force re-init
 
-    public Vector3 origin;
+    public Vector3 origin;      // specifies top left corner, for friendly gameboard coordinate logicss
 
     [Tooltip("Contains maps in plaintext format.")]
     public string MapFile  = "cube1.ascmap";
@@ -169,7 +170,7 @@ public class main : MonoBehaviour
             GlobalPool.map = newmaps[0].ToArray();
             map = GlobalPool.map;
             DestroyMap();
-            BuildMap();
+            BuildMap(map, gameboardTransform.transform);
         }
     }
 
@@ -256,7 +257,7 @@ public class main : MonoBehaviour
         plane.GetComponent<BoxCollider>().center = new Vector3(0, 0, minz);
     }
 
-    public void BuildMap()
+    public void BuildMap(string[] map, Transform transform)
     {
         BuildFloor();
 
@@ -271,7 +272,7 @@ public class main : MonoBehaviour
 
                 var startpos = TranslateGridCoordToWorld(new int2(x,y));
                 startpos.z -= cubeWallPrefab.transform.localScale.z * 0.50f;        // to workaround the origin of cubeWallPrefab being centered rather than at the foot/base of the model
-                var newcube  = Instantiate(cubeWallPrefab, gameboardTransform.transform);
+                var newcube  = Instantiate(cubeWallPrefab, transform);
                 GlobalPool.floors[0].walls.Add(newcube);
                 newcube.transform.localPosition = startpos;
                 newcube.transform.localRotation = Quaternion.identity; // Quaternion.AngleAxis(90, Vector3.right);
@@ -337,7 +338,7 @@ public class main : MonoBehaviour
 
         if (rebuildMap) {
             DestroyMap();
-            BuildMap();
+            BuildMap(map, gameboardTransform.transform);
         }
 
         if (restartPathRunner) {
