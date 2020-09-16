@@ -192,7 +192,6 @@ public class main : MonoBehaviour
         tileSelector = GameObject.Instantiate(tileSelectorPrefab, gameboardTransform.transform);
 
         ReloadMaps();
-        BuildMap();
         SetupAvatars();
         //RunDefinedCourse();
     }
