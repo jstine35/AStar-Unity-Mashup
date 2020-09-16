@@ -13,6 +13,11 @@ public static class Extensions {
     }
 }
 
+public class FloorZone {
+    public GameObject       floor;
+    public List<GameObject> walls = new List<GameObject>();
+}
+
 public static class GlobalPool {
     public static Yieldable.PathState yieldablePathState = new Yieldable.PathState();
     public static List<int2> yPathWaypoints = new List<int2>(48);
@@ -21,6 +26,8 @@ public static class GlobalPool {
     public static void AppendWaypoints(IEnumerable<int2> yieldable_path) {
         YPath.AppendWaypoints(yieldable_path, ref yPathWaypoints);
     }
+
+    public static FloorZone[] floors = new FloorZone[4];
 }
 
 public static class YPath {
@@ -54,9 +61,10 @@ public static class YPath {
 
 public class main : MonoBehaviour
 {
+    public GameObject floorPrefab;
     public GameObject cubeWallPrefab;
-    public GameObject gameboardTransform;
     public GameObject tileSelectorPrefab;
+    public GameObject gameboardTransform;
         
     Vector3 pform_cubeWall;        // position transform for cubeWalls
 
@@ -181,6 +189,9 @@ public class main : MonoBehaviour
     }
 
     void Awake() {
+        for(int i=0; i<GlobalPool.floors.Length; ++i) {
+            GlobalPool.floors[i] = new FloorZone();
+        }
     }
 
     void Start()
@@ -194,42 +205,71 @@ public class main : MonoBehaviour
         //RunDefinedCourse();
     }
 
-    public GameObject[] GetLevelCubes()
-    {
-        return GameObject.FindGameObjectsWithTag("DynamicLevelObject");
-    }
-
     public void DestroyMap() {
-        Debug.Log("Destroying all level cubes...");
-        foreach(var item in GetLevelCubes()) {
+        Debug.Log("Destroying all level objects...");
+        var floor = GlobalPool.floors[0];
+        foreach(var item in floor?.walls) {
             GameObject.Destroy(item);
         }
+        GameObject.Destroy(floor.floor);
+
+        floor.floor = null;
+        floor.walls.Clear();
+
         visibleWallSizeScale = Vector3.zero;
     }
 
-    public void LevelScaleCubes(float newScale) {
+    public void LevelScaleCubes(FloorZone floor, float newScale) {
         var wallScale3 = new Vector3(newScale, newScale, cubeWallPrefab.transform.localScale.z);
         var cubeScale = Vector3.Scale(MapGridScale, wallScale3);
         if (visibleWallSizeScale == cubeScale) return;
         visibleWallSizeScale = cubeScale;
-        foreach(var item in GetLevelCubes()) {
+        foreach(var item in floor.walls) {
             item.transform.localScale = cubeScale;
         }
-        tileSelector.transform.localScale = new Vector3(tileSizeUnits, tileSizeUnits * tileSelectorPrefab.transform.localScale.y, tileSizeUnits);
+        tileSelector.transform.localScale = new Vector3(tileSizeUnits, cubeWallPrefab.transform.localScale.z * tileSelectorPrefab.transform.localScale.y, tileSizeUnits);
     }
 
-    public void BuildMap()
-    {
+    public void BuildFloor() {
         int2 map_size = new int2 { x = map[0].Length, y = map.Length };
 
         // scale the plane so that each map unit is roughly 1 x 1 world units
         var planeUnitsAtScale1 = 1.0f;
         var planeScale = new Vector3(map_size.x * tileSizeUnits / planeUnitsAtScale1, map_size.y * tileSizeUnits / planeUnitsAtScale1, 1);
 
-        var plane = GameObject.Find("FloorQuad");
-        plane.transform.localScale = planeScale;
         origin = (planeScale * 0.5f) - planeScale;
         origin.z = 0;
+
+        var plane = GameObject.Instantiate(floorPrefab, gameboardTransform.transform);
+        GlobalPool.floors[0].floor = plane;
+
+        plane.transform.localScale = Vector3.one;
+	
+        var mesh = plane.GetComponent<MeshFilter>().mesh;
+		var overts = mesh.vertices;
+		var dverts = new Vector3[overts.Length];
+        float minz = float.MaxValue;
+
+		foreach (var vert in overts) {
+            minz = Mathf.Min(minz, vert.z);
+        }
+
+		for (int i = 0; i < overts.Length; i++) {
+			dverts[i] = Vector3.Scale(overts[i], planeScale) + new Vector3(0,0,minz);
+        }
+
+        mesh.vertices = dverts;
+        mesh.RecalculateNormals();
+
+        plane.GetComponent<BoxCollider>().size   = planeScale;
+        plane.GetComponent<BoxCollider>().center = new Vector3(0,0,minz);
+    }
+
+    public void BuildMap()
+    {
+        BuildFloor();
+
+        int2 map_size = new int2 { x = map[0].Length, y = map.Length };
 
         Debug.Log($"origin = {origin}");
 
@@ -242,12 +282,13 @@ public class main : MonoBehaviour
                 startpos.z -= 2;
                 //Quaternion.AngleAxis(90, Vector3.right) 
                 var newcube  = Instantiate(cubeWallPrefab, gameboardTransform.transform);
+                GlobalPool.floors[0].walls.Add(newcube);
                 newcube.transform.localPosition = startpos;
                 newcube.transform.localRotation = Quaternion.identity; // Quaternion.AngleAxis(90, Vector3.right);
                 newcube.tag                     = "DynamicLevelObject";
             }
         }
-        LevelScaleCubes(wallSizeScale);
+        LevelScaleCubes(GlobalPool.floors[0], wallSizeScale);
     }
 
     public void RunDefinedCourse()
@@ -313,7 +354,7 @@ public class main : MonoBehaviour
             SetupAvatars();
         }
 
-        LevelScaleCubes(wallSizeScale);
+        LevelScaleCubes(GlobalPool.floors[0], wallSizeScale);
 
         // reset button-like toggles to 0
         rebuildMap = false;
