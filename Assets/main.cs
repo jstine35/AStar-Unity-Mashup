@@ -262,7 +262,7 @@ public class main : MonoBehaviour
         mesh.RecalculateNormals();
 
         plane.GetComponent<BoxCollider>().size   = planeScale;
-        plane.GetComponent<BoxCollider>().center = new Vector3(0,0,minz);
+        plane.GetComponent<BoxCollider>().center = new Vector3(0, 0, minz);
     }
 
     public void BuildMap()
@@ -279,7 +279,7 @@ public class main : MonoBehaviour
                 if (map[y][x] == ' ') continue;
 
                 var startpos = TranslateGridCoordToWorld(new int2(x,y));
-                startpos.z -= 2;
+                startpos.z -= cubeWallPrefab.transform.localScale.z * 0.40f;
                 //Quaternion.AngleAxis(90, Vector3.right) 
                 var newcube  = Instantiate(cubeWallPrefab, gameboardTransform.transform);
                 GlobalPool.floors[0].walls.Add(newcube);
