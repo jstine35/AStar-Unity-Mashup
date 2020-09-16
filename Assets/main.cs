@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.IO;
 using UnityEngine;
 using AStar;
 using UnityEditor;
@@ -102,6 +103,11 @@ public class main : MonoBehaviour
 
     public Vector3 origin;
 
+    [Tooltip("Contains maps in plaintext format.")]
+    public string MapFile  = "cube1.ascmap";
+
+    private double mapFileLastWriteInSecs;
+
     // Toggles being treated as buttons.
     // These are reset to unchecked on each update.
     [Header("PseudoButtons")]
@@ -151,6 +157,41 @@ public class main : MonoBehaviour
         //targatar .transform.localRotation = Quaternion.identity;
     }
 
+    void ReloadMaps() {
+        Debug.Log($"Reloading map data from file: {MapFile}");
+
+        StreamReader reader = new StreamReader(MapFile);
+        var newmaps = new List<List<string>>();
+        var newmap = new List<string>();
+        while (!reader.EndOfStream) {
+            var line = reader.ReadLine();
+            if (string.IsNullOrWhiteSpace(line)) {
+                newmaps.Add(newmap);
+                newmap.Clear();
+            }
+            else {
+                newmap.Add(line);
+            }
+        }
+
+        GlobalPool.map = newmaps[0].ToArray();
+        map = GlobalPool.map;
+
+        DestroyMap();
+        BuildMap();
+    }
+
+    void UpdateStaleAssets() {
+        if (mapFileLastWriteInSecs != File.GetLastWriteTime(MapFile).GetUnixTimeSecs()) {
+            Debug.Log($"Stale asset {MapFile} detected");
+            mapFileLastWriteInSecs = File.GetLastWriteTime(MapFile).GetUnixTimeSecs();
+            ReloadMaps();
+        }
+    }
+
+    void Awake() {
+    }
+
     void Start()
     {
         tileSelector = GameObject.Instantiate(tileSelectorPrefab, gameboardTransform.transform);
@@ -158,7 +199,7 @@ public class main : MonoBehaviour
 
         BuildMap();
         SetupAvatars();
-        RunDefinedCourse();
+        //RunDefinedCourse();
     }
 
     public GameObject[] GetLevelCubes()
