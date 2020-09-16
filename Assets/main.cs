@@ -16,29 +16,7 @@ public static class Extensions {
 public static class GlobalPool {
     public static Yieldable.PathState yieldablePathState = new Yieldable.PathState();
     public static List<int2> yPathWaypoints = new List<int2>(48);
-    public static string[] map = {
-        "+-----------------+",
-        "|                 |",
-        "|             X   |",
-        "|            XX   |",
-        "| Xxxxxxxxxxxxx   |",
-        "|  x              |",
-        "|x  x             |",
-        "|x x         X    |",
-        "|x x              |",
-        "|  xA  X          |",
-        "|  XXXXX  X   X   |",
-        "| XXXXXX  X       |",
-        "| XXXXXX  X       |",
-        "|    x  XX     X  |",
-        "|   Bx X          |",
-        "|xxxxx  XXXXX     |",
-        "|                 |",
-        "|                 |",
-        "|                 |",
-        "|                 |",
-        "+-----------------+",
-    };
+    public static string[] map;
 
     public static void AppendWaypoints(IEnumerable<int2> yieldable_path) {
         YPath.AppendWaypoints(yieldable_path, ref yPathWaypoints);
@@ -130,8 +108,7 @@ public class main : MonoBehaviour
         return origin + new Vector3(vec.x, vec.y, 0);  
     }
 
-    public Vector3 TranslateWorldCoordToGrid(Vector3 world)
-    {
+    public Vector3 TranslateWorldCoordToGrid(Vector3 world) {
         var vec = world - origin;
         var gridunits =  Vector3.Scale(vec, MapGridTransToOriginInv);
         return gridunits; // - new Vector3(0.5f, 0.5f);
@@ -157,8 +134,20 @@ public class main : MonoBehaviour
         //targatar .transform.localRotation = Quaternion.identity;
     }
 
+    bool IsMapChanged(string[] dest, IList<string> src) {
+        if (dest is null) return true;
+        if (src is null) return false;
+        if (dest.Length != src.Count) return true;
+        for(int i=0; i<dest.Length; ++i) {
+            if (dest[i] != src[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     void ReloadMaps() {
-        Debug.Log($"Reloading map data from file: {MapFile}");
+        Debug.Log($"Scanning map data: {MapFile}");
 
         StreamReader reader = new StreamReader(MapFile);
         var newmaps = new List<List<string>>();
@@ -174,11 +163,13 @@ public class main : MonoBehaviour
             }
         }
 
-        GlobalPool.map = newmaps[0].ToArray();
-        map = GlobalPool.map;
-
-        DestroyMap();
-        BuildMap();
+        if (IsMapChanged(GlobalPool.map, newmaps[0])) {
+            Debug.Log($"Applying new data for map panel 1");
+            GlobalPool.map = newmaps[0].ToArray();
+            map = GlobalPool.map;
+            DestroyMap();
+            BuildMap();
+        }
     }
 
     void UpdateStaleAssets() {
@@ -197,6 +188,7 @@ public class main : MonoBehaviour
         tileSelector = GameObject.Instantiate(tileSelectorPrefab, gameboardTransform.transform);
         pform_cubeWall = new Vector3(0, 0, cubeWallPrefab.GetComponent<Renderer>().bounds.extents.z);
 
+        ReloadMaps();
         BuildMap();
         SetupAvatars();
         //RunDefinedCourse();
@@ -207,11 +199,12 @@ public class main : MonoBehaviour
         return GameObject.FindGameObjectsWithTag("DynamicLevelObject");
     }
 
-    public void DestroyMap()
-    {
+    public void DestroyMap() {
+        Debug.Log("Destroying all level cubes...");
         foreach(var item in GetLevelCubes()) {
             GameObject.Destroy(item);
         }
+        visibleWallSizeScale = Vector3.zero;
     }
 
     public void LevelScaleCubes(float newScale) {
@@ -300,8 +293,17 @@ public class main : MonoBehaviour
         stickpath.ApplyWaypointList();
     }
 
+
+    private double lastAssetPollTime;
+
     void Update()
     {
+        var nowtime = System.DateTime.UtcNow.GetUnixTimeSecs();
+        if (nowtime > lastAssetPollTime + 2) {
+            lastAssetPollTime = nowtime;
+            UpdateStaleAssets();
+        }
+
         if (rebuildMap) {
             DestroyMap();
             BuildMap();

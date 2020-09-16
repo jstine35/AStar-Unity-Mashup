@@ -980,6 +980,7 @@ MonoBehaviour:
   tileSizeUnits: 4
   wallSizeScale: 0.9
   origin: {x: 0, y: 0, z: 0}
+  MapFile: Assets/MapData/cube1.ascmap
   rebuildMap: 0
   restartPathRunner: 0
 --- !u!4 &1096255668
@@ -1130,6 +1131,8 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AdditionalShaderChannelsFlag
       value: 25
+      propertyPath: m_PixelPerfect
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e7a8a11efe348004b9e8b030fbb5c5a3, type: 3}
