@@ -14,6 +14,7 @@ public static class Extensions {
 }
 
 public class FloorZone {
+    public GameObject       xformObj;
     public GameObject       floor;
     public List<GameObject> walls = new List<GameObject>();
 }
@@ -61,10 +62,11 @@ public static class YPath {
 
 public class main : MonoBehaviour
 {
+    public GameObject floorTransform;
     public GameObject floorPrefab;
     public GameObject cubeWallPrefab;
     public GameObject tileSelectorPrefab;
-    public GameObject gameboardTransform;
+    public GameObject gameWorldTransform;
         
     // Map can be any size. Size will be calculated from the input data.
     //
@@ -85,7 +87,7 @@ public class main : MonoBehaviour
     public float wallSizeScale = 0.9f;
     private Vector3 visibleWallSizeScale = Vector3.negativeInfinity;    // -1 to force re-init
 
-    public Vector3 origin;
+    public Vector3 origin;      // specifies top left corner, for friendly gameboard coordinate logicss
 
     [Tooltip("Contains maps in plaintext format.")]
     public string MapFile  = "cube1.ascmap";
@@ -128,8 +130,8 @@ public class main : MonoBehaviour
         var stickatar = GameObject.Find("Stickatar");
         var targatar  = GameObject.Find("Targatar");
 
-        stickatar.transform.parent = gameboardTransform.transform;
-        targatar .transform.parent = gameboardTransform.transform;
+        stickatar.transform.parent = GlobalPool.floors[0].xformObj.transform;
+        targatar .transform.parent = GlobalPool.floors[0].xformObj.transform;
         
         stickatar.transform.localPosition = TranslateGridCoordToWorld(start);
         targatar .transform.localPosition = TranslateGridCoordToWorld(target);
@@ -168,9 +170,14 @@ public class main : MonoBehaviour
             Debug.Log($"Applying new data for map panel 1");
             GlobalPool.map = newmaps[0].ToArray();
             map = GlobalPool.map;
-            DestroyMap();
-            BuildMap();
+            DestroyMap(0);
+            BuildMap(0, map);
         }
+
+        //var newTransformObject = Instantiate(floorTransform, new Vector3(0,38,0), gameboardTransform.transform.rotation * Quaternion.Euler(90,0,0));
+        //newxform.rotation *= Quaternion.AxisAngle(
+        DestroyMap(1);
+        BuildMap(1, newmaps[1].ToArray());
     }
 
     void UpdateStaleAssets() {
@@ -184,22 +191,28 @@ public class main : MonoBehaviour
     void Awake() {
         for(int i=0; i<GlobalPool.floors.Length; ++i) {
             GlobalPool.floors[i] = new FloorZone();
+            GlobalPool.floors[i].xformObj = Instantiate(floorTransform, gameWorldTransform.transform);
         }
     }
 
     void Start()
     {
-        tileSelector = GameObject.Instantiate(tileSelectorPrefab, gameboardTransform.transform);
+        tileSelector = GameObject.Instantiate(tileSelectorPrefab, GlobalPool.floors[0].xformObj.transform);
 
         ReloadMaps();
         SetupAvatars();
         //RunDefinedCourse();
     }
 
-    public void DestroyMap() {
-        Debug.Log("Destroying all level objects...");
-        var floor = GlobalPool.floors[0];
-        foreach(var item in floor?.walls) {
+    public void DestroyMap(int idx) {
+        Debug.Log($"Destroying level objects on floor {idx}");
+        DestroyMap(GlobalPool.floors[idx]);
+    }
+
+    public void DestroyMap(FloorZone floor) {
+        if (floor is null) return;
+
+        foreach(var item in floor.walls) {
             GameObject.Destroy(item);
         }
         GameObject.Destroy(floor.floor);
@@ -221,7 +234,7 @@ public class main : MonoBehaviour
         tileSelector.transform.localScale = new Vector3(tileSizeUnits, cubeWallPrefab.transform.localScale.z * tileSelectorPrefab.transform.localScale.y, tileSizeUnits);
     }
 
-    public void BuildFloor() {
+    public void BuildFloor(FloorZone floorzone) {
         int2 map_size = new int2 { x = map[0].Length, y = map.Length };
 
         // scale the plane so that each map unit is roughly 1 x 1 world units
@@ -231,8 +244,8 @@ public class main : MonoBehaviour
         origin = (planeScale * 0.5f) - planeScale;
         origin.z = 0;
 
-        var plane = GameObject.Instantiate(floorPrefab, gameboardTransform.transform);
-        GlobalPool.floors[0].floor = plane;
+        var plane = GameObject.Instantiate(floorPrefab, floorzone.xformObj.transform);
+        floorzone.floor = plane;
 
         plane.transform.localScale = Vector3.one;
 	
@@ -256,9 +269,14 @@ public class main : MonoBehaviour
         plane.GetComponent<BoxCollider>().center = new Vector3(0, 0, minz);
     }
 
-    public void BuildMap()
-    {
-        BuildFloor();
+    public void BuildMap(int floor_id, string[] map) {
+        BuildMap(GlobalPool.floors[floor_id], map);
+    }
+
+    public void BuildMap(FloorZone floor, string[] map) {
+        BuildFloor(floor);
+
+        transform.position = new Vector3(0,0,origin.x);
 
         int2 map_size = new int2 { x = map[0].Length, y = map.Length };
 
@@ -271,14 +289,14 @@ public class main : MonoBehaviour
 
                 var startpos = TranslateGridCoordToWorld(new int2(x,y));
                 startpos.z -= cubeWallPrefab.transform.localScale.z * 0.50f;        // to workaround the origin of cubeWallPrefab being centered rather than at the foot/base of the model
-                var newcube  = Instantiate(cubeWallPrefab, gameboardTransform.transform);
-                GlobalPool.floors[0].walls.Add(newcube);
+                var newcube  = Instantiate(cubeWallPrefab, floor.xformObj.transform);
+                floor.walls.Add(newcube);
                 newcube.transform.localPosition = startpos;
                 newcube.transform.localRotation = Quaternion.identity; // Quaternion.AngleAxis(90, Vector3.right);
                 newcube.tag                     = "DynamicLevelObject";
             }
         }
-        LevelScaleCubes(GlobalPool.floors[0], wallSizeScale);
+        LevelScaleCubes(floor, wallSizeScale);
     }
 
     public void RunDefinedCourse()
@@ -336,8 +354,8 @@ public class main : MonoBehaviour
         }
 
         if (rebuildMap) {
-            DestroyMap();
-            BuildMap();
+            DestroyMap(0);
+            BuildMap(0, map);
         }
 
         if (restartPathRunner) {
