@@ -6,6 +6,12 @@ using UnityEngine;
 using AStar;
 using UnityEditor;
 
+public static class Extensions {
+    public static double GetUnixTimeSecs(this System.DateTime date) {
+        return new System.DateTimeOffset(date).ToUnixTimeMilliseconds() / 1000.0;
+    }
+}
+
 public static class GlobalPool {
     public static Yieldable.PathState yieldablePathState = new Yieldable.PathState();
     public static List<int2> yPathWaypoints = new List<int2>(48);
@@ -108,11 +114,10 @@ public class main : MonoBehaviour
     public Vector3 MapGridScale            => new Vector3(tileSizeUnits,  tileSizeUnits, 1);
     public Vector3 MapGridTransToOrigin    => new Vector3(tileSizeUnits,  tileSizeUnits, 1);
     public Vector3 MapGridTransToOriginInv => new Vector3(1.0f/tileSizeUnits, 1.0f/tileSizeUnits, 1);
-
-    public string[] map = GlobalPool.map;
     
     public static GameObject tileSelector;
 
+    private string[] map = GlobalPool.map;
 
     public Vector3 TranslateGridCoordToWorld(int2 coord) {
         var vec = pform_cubeWall + Vector3.Scale(new Vector3(coord.x + 0.5f, coord.y + 0.5f, 0), MapGridTransToOrigin);

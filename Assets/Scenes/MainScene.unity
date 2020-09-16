@@ -982,28 +982,6 @@ MonoBehaviour:
   origin: {x: 0, y: 0, z: 0}
   rebuildMap: 0
   restartPathRunner: 0
-  map:
-  - +-----------------+
-  - '|                 |'
-  - '|             X   |'
-  - '|            XX   |'
-  - '| Xxxxxxxxxxxxx   |'
-  - '|  x              |'
-  - '|x  x             |'
-  - '|x x         X    |'
-  - '|x x              |'
-  - '|  xA  X          |'
-  - '|  XXXXX  X   X   |'
-  - '| XXXXXX  X       |'
-  - '| XXXXXX  X       |'
-  - '|    x  XX     X  |'
-  - '|   Bx X          |'
-  - '|xxxxx  XXXXX     |'
-  - '|                 |'
-  - '|                 |'
-  - '|                 |'
-  - '|                 |'
-  - +-----------------+
 --- !u!4 &1096255668
 Transform:
   m_ObjectHideFlags: 0
@@ -1150,8 +1128,8 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6574767004685065123, guid: e7a8a11efe348004b9e8b030fbb5c5a3,
         type: 3}
-      propertyPath: m_PixelPerfect
-      value: 0
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e7a8a11efe348004b9e8b030fbb5c5a3, type: 3}
