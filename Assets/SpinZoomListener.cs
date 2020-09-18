@@ -6,8 +6,9 @@ public class SpinZoomListener : MonoBehaviour
 {
     bool    lastMouseIsSpinning = false;
     Vector3 lastMouseSpinViewPos;
-    Vector3 spinOrient;
-    
+    Quaternion spinOrient;
+    float    spinOrientZ;
+
     public enum ZoomViewAngle {
         LowPersp,
         HighPersp,
@@ -20,23 +21,32 @@ public class SpinZoomListener : MonoBehaviour
     public float RotationSpeed = 120.0f;
     public Vector2 PerspectiveAnglesLo = new Vector2(50.0f, -36.0f);
     public Vector2 PerspectiveAnglesHi = new Vector2(30.0f, -18.0f);
+
+    public GameObject gameBoard = null;
     
     Vector2 persp_angles_curr;
     Vector2 persp_angles_targ;
+
+    void ApplyOrientation() {
+        var board = (gameBoard == null) ? GlobalPool.floors[0].floor : gameBoard;
+        var lrot = Quaternion.Euler(persp_angles_curr.x, persp_angles_curr.y, 0);
+        var axis = lrot * board.transform.forward;
+        Debug.DrawRay(board.transform.position, axis*50, Color.red, 9);
+        gameObject.transform.localRotation = Quaternion.AngleAxis(spinOrientZ, Vector3.forward) * Quaternion.Euler(persp_angles_curr.x, persp_angles_curr.y, 0);
+    }
 
     // Start is called before the first frame update
     void Start()
     {
         switch(ZoomAngle) {
-            case ZoomViewAngle.LowPersp : persp_angles_curr = new Vector2(30, -30) ; break;
-            case ZoomViewAngle.HighPersp: persp_angles_curr = new Vector2(50, -40) ; break;
+            case ZoomViewAngle.LowPersp : persp_angles_curr = PerspectiveAnglesLo ; break;
+            case ZoomViewAngle.HighPersp: persp_angles_curr = PerspectiveAnglesHi ; break;
         }
 
         var xform = gameObject.transform;
         persp_angles_targ = persp_angles_curr;
         var angles = xform.localRotation.eulerAngles;
         xform.localRotation = Quaternion.Euler(persp_angles_curr.x, persp_angles_curr.y, angles.z);
-        Physics.gravity = gameObject.transform.TransformDirection(new Vector3(0,0,1));
     }
 
     // Update is called once per frame
@@ -47,7 +57,8 @@ public class SpinZoomListener : MonoBehaviour
             ZoomLevel = (ZoomLevel % 3) + 1; 
         }
 
-        var cam = Camera.main; 
+        var cam = gameObject.GetComponent<Camera>();
+
         if (cam != null) {
             ZoomLevel = Mathf.Clamp(ZoomLevel, 1, 3);
             switch(ZoomLevel) {
@@ -66,17 +77,13 @@ public class SpinZoomListener : MonoBehaviour
             }
             
             switch(ZoomAngle) {
-                case ZoomViewAngle.LowPersp  : persp_angles_targ = new Vector2(30, -30); break;
-                case ZoomViewAngle.HighPersp : persp_angles_targ = new Vector2(50, -40); break;
+                case ZoomViewAngle.LowPersp  : persp_angles_targ = PerspectiveAnglesLo; break;
+                case ZoomViewAngle.HighPersp : persp_angles_targ = PerspectiveAnglesHi; break;
             }
         }
         
         if (persp_angles_targ != persp_angles_curr) {
             persp_angles_curr = Vector2.MoveTowards(persp_angles_curr, persp_angles_targ, RotationSpeed * Time.deltaTime);
-            var angles = xform.transform.localRotation.eulerAngles;
-            xform.transform.localRotation = Quaternion.Euler(persp_angles_curr.x, persp_angles_curr.y, angles.z);
-            Physics.gravity = gameObject.transform.TransformDirection(new Vector3(0,0,1));
-
             if (Vector2.Distance(persp_angles_curr, persp_angles_targ) < 0.01f) {
                 persp_angles_curr = persp_angles_targ;
             }
@@ -85,20 +92,17 @@ public class SpinZoomListener : MonoBehaviour
         if (Input.GetKey("left ctrl")) {
             if (Input.GetMouseButton(0)) {
                 doSpin = true;
-
                 if (!lastMouseIsSpinning) {
                     lastMouseIsSpinning = true;
-                    spinOrient = xform.transform.localRotation.eulerAngles;
                 }
                 else {
                     var delta = Input.mousePosition - lastMouseSpinViewPos;
-                    spinOrient.z += delta.x / 6;
-                    xform.transform.localRotation = Quaternion.Euler(spinOrient);
-                    Physics.gravity = gameObject.transform.TransformDirection(new Vector3(0,0,1));
+                    spinOrientZ += delta.x / 6;
                 }
                 lastMouseSpinViewPos = Input.mousePosition;
             }
         }
         lastMouseIsSpinning = doSpin;
+        ApplyOrientation();
     }
 }
