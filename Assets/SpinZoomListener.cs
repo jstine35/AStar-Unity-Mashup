@@ -106,3 +106,16 @@ public class SpinZoomListener : MonoBehaviour
         ApplyOrientation();
     }
 }
+
+#if false
+// TODO: realistically depends on input system package import.
+//    (ok, could reinvent the wheel for input systems but don't care)
+// Let's fix up basic architercture of camera operation first.
+public class CameraPanHandler : MonoBehaviour
+{
+    void Update() {
+        if (Input.GetKey("left ctrl")) {
+        }
+    }
+}
+#endif
