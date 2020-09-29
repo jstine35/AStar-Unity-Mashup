@@ -103,23 +103,23 @@ public class main : MonoBehaviour
     [Tooltip("Restart the built-in path runner.")]
     public bool restartPathRunner;
     
-    public Vector3 MapGridScale            => new Vector3(tileSizeUnits,  tileSizeUnits, 1);
-    public Vector3 MapGridTransToOrigin    => new Vector3(tileSizeUnits,  tileSizeUnits, 1);
-    public Vector3 MapGridTransToOriginInv => new Vector3(1.0f/tileSizeUnits, 1.0f/tileSizeUnits, 1);
+    public Vector3 MapGridScale            => new Vector3(tileSizeUnits, 1, tileSizeUnits);
+    public Vector3 MapGridTransToOrigin    => new Vector3(tileSizeUnits, 1, tileSizeUnits);
+    public Vector3 MapGridTransToOriginInv => new Vector3(1.0f/tileSizeUnits, 1, 1.0f/tileSizeUnits);
     
     public static GameObject tileSelector;
 
     private string[] map = GlobalPool.map;
 
     public Vector3 TranslateGridCoordToWorld(int2 coord) {
-        var vec = Vector3.Scale(new Vector3(coord.x + 0.5f, coord.y + 0.5f, 0), MapGridTransToOrigin);
-        return origin + new Vector3(vec.x, vec.y, 0);  
+        var vec = Vector3.Scale(new Vector3(coord.x + 0.5f, 0, coord.y + 0.5f), MapGridTransToOrigin);
+        return origin + vec;
     }
 
-    public Vector3 TranslateWorldCoordToGrid(Vector3 world) {
+    public Vector2 TranslateWorldCoordToGrid(Vector3 world) {
         var vec = world - origin;
-        var gridunits =  Vector3.Scale(vec, MapGridTransToOriginInv);
-        return gridunits; // - new Vector3(0.5f, 0.5f);
+        var gridunits = Vector3.Scale(vec, MapGridTransToOriginInv);
+        return new Vector2(gridunits.x, gridunits.z);
     }
 
     void SetupAvatars()
@@ -174,8 +174,6 @@ public class main : MonoBehaviour
             BuildMap(0, map);
         }
 
-        //var newTransformObject = Instantiate(floorTransform, new Vector3(0,38,0), gameboardTransform.transform.rotation * Quaternion.Euler(90,0,0));
-        //newxform.rotation *= Quaternion.AxisAngle(
         DestroyMap(1);
         BuildMap(1, newmaps[1].ToArray());
     }
@@ -234,14 +232,43 @@ public class main : MonoBehaviour
         tileSelector.transform.localScale = new Vector3(tileSizeUnits, cubeWallPrefab.transform.localScale.z * tileSelectorPrefab.transform.localScale.y, tileSizeUnits);
     }
 
+    Mesh cubeWallMesh;
+
+    public void BuildCubeWallMesh(float wallHeight) {
+        if (cubeWallMesh == null) {
+            cubeWallMesh = cubeWallPrefab.GetComponent<MeshFilter>().sharedMesh;
+        }
+
+        var mesh = cubeWallMesh;
+		var origvtx = mesh.vertices;
+		var destvtx = new Vector3[origvtx.Length];
+
+        Vector3 scale = new Vector3(wallSizeScale,1,wallSizeScale);
+        Vector3 xform = new Vector3(0,wallHeight,0);
+
+        for (int i = 0; i < origvtx.Length; i++) {
+            var localscale = scale;
+            if (origvtx[i].y <= 0) localscale.y = 1;
+			destvtx[i] = Vector3.Scale(origvtx[i], scale);
+        }
+
+        mesh.vertices = destvtx;
+        mesh.RecalculateNormals();
+        cubeWallMesh = mesh;
+    }
+
+    // resulting floor mesh is built following Y-up convention.
     public void BuildFloor(FloorZone floorzone) {
         int2 map_size = new int2 { x = map[0].Length, y = map.Length };
 
-        // scale the plane so that each map unit is roughly 1 x 1 world units
         var planeUnitsAtScale1 = 1.0f;
-        var planeScale = new Vector3(map_size.x * tileSizeUnits / planeUnitsAtScale1, map_size.y * tileSizeUnits / planeUnitsAtScale1, 1);
+        var planeSize = new Vector3(
+            x: map_size.x * tileSizeUnits / planeUnitsAtScale1,
+            y: 1,
+            z: map_size.y * tileSizeUnits / planeUnitsAtScale1
+        );
 
-        origin = (planeScale * 0.5f) - planeScale;
+        origin = (planeSize * 0.5f) - planeSize;
         origin.z = 0;
 
         var plane = GameObject.Instantiate(floorPrefab, floorzone.xformObj.transform);
@@ -250,23 +277,23 @@ public class main : MonoBehaviour
         plane.transform.localScale = Vector3.one;
 	
         var mesh = plane.GetComponent<MeshFilter>().mesh;
-		var overts = mesh.vertices;
-		var dverts = new Vector3[overts.Length];
-        float minz = float.MaxValue;
+		var origvtx = mesh.vertices;
+		var destvtx = new Vector3[origvtx.Length];
+        float miny = float.MaxValue;
 
-		foreach (var vert in overts) {
-            minz = Mathf.Min(minz, vert.z);
+		foreach (var vert in origvtx) {
+            miny = Mathf.Min(miny, vert.y);
         }
 
-		for (int i = 0; i < overts.Length; i++) {
-			dverts[i] = Vector3.Scale(overts[i], planeScale) + new Vector3(0,0,minz);
+		for (int i = 0; i < origvtx.Length; i++) {
+			destvtx[i] = Vector3.Scale(origvtx[i], planeSize) + new Vector3(0,miny,0);
         }
 
-        mesh.vertices = dverts;
+        mesh.vertices = destvtx;
         mesh.RecalculateNormals();
 
-        plane.GetComponent<BoxCollider>().size   = planeScale;
-        plane.GetComponent<BoxCollider>().center = new Vector3(0, 0, minz);
+        plane.GetComponent<BoxCollider>().size   = planeSize;
+        plane.GetComponent<BoxCollider>().center = new Vector3(0, miny, 0);
     }
 
     public void BuildMap(int floor_id, string[] map) {
@@ -288,7 +315,7 @@ public class main : MonoBehaviour
                 if (map[y][x] == ' ') continue;
 
                 var startpos = TranslateGridCoordToWorld(new int2(x,y));
-                startpos.z -= cubeWallPrefab.transform.localScale.z * 0.50f;        // to workaround the origin of cubeWallPrefab being centered rather than at the foot/base of the model
+                //startpos.y -= cubeWallPrefab.transform.localScale.y * 0.50f;        // to workaround the origin of cubeWallPrefab being centered rather than at the foot/base of the model
                 var newcube  = Instantiate(cubeWallPrefab, floor.xformObj.transform);
                 floor.walls.Add(newcube);
                 newcube.transform.localPosition = startpos;

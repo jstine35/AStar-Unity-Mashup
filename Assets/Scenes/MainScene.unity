@@ -145,13 +145,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 167040055}
-  m_LocalRotation: {x: 0.49181813, y: -0.049673785, z: -0.86927724, w: 0.002125434}
+  m_LocalRotation: {x: 0.4850109, y: 0.09144912, z: -0.86587954, w: 0.08157241}
   m_LocalPosition: {x: 55.493896, y: 25.165642, z: 34.47056}
   m_LocalScale: {x: 1, y: 1, z: 1.1186001}
   m_Children: []
   m_Father: {fileID: 1954805491}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: -4.834, y: 300.872, z: 183.023}
+  m_LocalEulerAnglesHint: {x: 13.739, y: 301.864, z: 183.101}
 --- !u!108 &167040057
 Light:
   m_ObjectHideFlags: 0
@@ -237,13 +237,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 198074382}
-  m_LocalRotation: {x: -0.30600387, y: 0.41974872, z: 0.03168588, w: 0.8539137}
+  m_LocalRotation: {x: 0.89320195, y: -0.03932522, z: -0.41910204, w: 0.15810554}
   m_LocalPosition: {x: 47.559956, y: 21.568235, z: 29.544239}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1954805491}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: -6.9870005, y: -10.178, z: 34.927002}
+  m_LocalEulerAnglesHint: {x: 14.4470005, y: -128.18901, z: -167.91301}
 --- !u!108 &198074384
 Light:
   m_ObjectHideFlags: 0
@@ -355,8 +355,8 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: -100
-  far clip plane: 1000
+  near clip plane: -10000
+  far clip plane: 10000
   field of view: 60
   orthographic: 1
   orthographic size: 26
@@ -404,8 +404,8 @@ MonoBehaviour:
   ZoomLevel: 1
   ZoomAngle: 1
   RotationSpeed: 120
-  PerspectiveAnglesLo: {x: -66, y: -6}
-  PerspectiveAnglesHi: {x: -30, y: -2}
+  PerspectiveAnglesLo: {x: 66, y: 6}
+  PerspectiveAnglesHi: {x: 30, y: 2}
   gameBoard: {fileID: 0}
 --- !u!1 &1096255666
 GameObject:
@@ -441,7 +441,7 @@ MonoBehaviour:
     type: 3}
   floorPrefab: {fileID: 6010427664012196186, guid: d5e41fe2f4414054b9bde11291c11ffb,
     type: 3}
-  cubeWallPrefab: {fileID: 6817490252743480953, guid: 03c6e418d4d81d743a5297c75970a6fb,
+  cubeWallPrefab: {fileID: 5530386573286555482, guid: 1e191c6f3bf90044aa74a84db44a3a6a,
     type: 3}
   tileSelectorPrefab: {fileID: 3986639997241730057, guid: 4e5a2eaf66a6d2a47a6f98b4fa52977f,
     type: 3}
