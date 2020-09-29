@@ -7,7 +7,7 @@ public class SpinZoomListener : MonoBehaviour
     bool    lastMouseIsSpinning = false;
     Vector3 lastMouseSpinViewPos;
     Quaternion spinOrient;
-    float    spinOrientZ;
+    float      spinOrientZ;
 
     public enum ZoomViewAngle {
         LowPersp,
@@ -19,8 +19,8 @@ public class SpinZoomListener : MonoBehaviour
     public ZoomViewAngle ZoomAngle;
 
     public float RotationSpeed = 120.0f;
-    public Vector2 PerspectiveAnglesLo = new Vector2(50.0f, -36.0f);
-    public Vector2 PerspectiveAnglesHi = new Vector2(30.0f, -18.0f);
+    public Vector2 PerspectiveAnglesLo = new Vector2(50.0f, 36.0f);
+    public Vector2 PerspectiveAnglesHi = new Vector2(30.0f, 18.0f);
 
     public GameObject gameBoard = null;
     
@@ -30,9 +30,9 @@ public class SpinZoomListener : MonoBehaviour
     void ApplyOrientation() {
         var board = (gameBoard == null) ? GlobalPool.floors[0].floor : gameBoard;
         var lrot = Quaternion.Euler(persp_angles_curr.x, persp_angles_curr.y, 0);
-        var axis = lrot * board.transform.forward;
+        var axis = lrot * board.transform.up;
         Debug.DrawRay(board.transform.position, axis*50, Color.red, 9);
-        gameObject.transform.localRotation = Quaternion.AngleAxis(spinOrientZ, Vector3.forward) * Quaternion.Euler(persp_angles_curr.x, persp_angles_curr.y, 0);
+        gameObject.transform.localRotation = Quaternion.AngleAxis(spinOrientZ, Vector3.up) * Quaternion.Euler(persp_angles_curr.x, persp_angles_curr.y, 0);
     }
 
     // Start is called before the first frame update
