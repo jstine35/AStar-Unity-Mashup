@@ -441,7 +441,7 @@ MonoBehaviour:
     type: 3}
   floorPrefab: {fileID: 6010427664012196186, guid: d5e41fe2f4414054b9bde11291c11ffb,
     type: 3}
-  cubeWallPrefab: {fileID: 5530386573286555482, guid: 1e191c6f3bf90044aa74a84db44a3a6a,
+  cubeWallPrefab: {fileID: 6817490252743480953, guid: 03c6e418d4d81d743a5297c75970a6fb,
     type: 3}
   tileSelectorPrefab: {fileID: 3986639997241730057, guid: 4e5a2eaf66a6d2a47a6f98b4fa52977f,
     type: 3}

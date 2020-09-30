@@ -301,6 +301,7 @@ public class main : MonoBehaviour
     }
 
     public void BuildMap(FloorZone floor, string[] map) {
+        BuildCubeWallMesh(5);
         BuildFloor(floor);
 
         transform.position = new Vector3(0,0,origin.x);
