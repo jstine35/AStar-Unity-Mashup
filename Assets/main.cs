@@ -82,6 +82,8 @@ public class main : MonoBehaviour
     [Tooltip("Size of each tile space in Unity Units")]
     public float   tileSizeUnits = 1.0f;
 
+    public float   cubeWallHeight = 5.0f;
+
     [Range(0.4f, 1.2f)]
     [Tooltip("Adjust size of each wall block, smaller values create gaps between tiles for more retro look")]
     public float wallSizeScale = 0.9f;
@@ -174,8 +176,8 @@ public class main : MonoBehaviour
             BuildMap(0, map);
         }
 
-        DestroyMap(1);
-        BuildMap(1, newmaps[1].ToArray());
+        //DestroyMap(1);
+        //BuildMap(1, newmaps[1].ToArray());
     }
 
     void UpdateStaleAssets() {
@@ -221,39 +223,34 @@ public class main : MonoBehaviour
         visibleWallSizeScale = Vector3.zero;
     }
 
-    public void LevelScaleCubes(FloorZone floor, float newScale) {
-        var wallScale3 = new Vector3(newScale, newScale, cubeWallPrefab.transform.localScale.z);
-        var cubeScale = Vector3.Scale(MapGridScale, wallScale3);
-        if (visibleWallSizeScale == cubeScale) return;
-        visibleWallSizeScale = cubeScale;
-        foreach(var item in floor.walls) {
-            item.transform.localScale = cubeScale;
-        }
-        tileSelector.transform.localScale = new Vector3(tileSizeUnits, cubeWallPrefab.transform.localScale.z * tileSelectorPrefab.transform.localScale.y, tileSizeUnits);
-    }
-
     Mesh cubeWallMesh;
 
-    public void BuildCubeWallMesh(float wallHeight) {
+    public void BuildCubeWallMesh(Vector2 size, float height) {
         if (cubeWallMesh == null) {
-            cubeWallMesh = cubeWallPrefab.GetComponent<MeshFilter>().sharedMesh;
+            cubeWallMesh = Instantiate(cubeWallPrefab.GetComponent<MeshFilter>().sharedMesh);
         }
+
+        var scale3 = new Vector3(size.x * wallSizeScale, cubeWallHeight, size.y * wallSizeScale);
+        var cubeScale = Vector3.Scale(MapGridScale, scale3);
+        if (visibleWallSizeScale == cubeScale) return;
+        visibleWallSizeScale = cubeScale;
+
+        Debug.Log($"Rebuilding cubeWall scale = {visibleWallSizeScale}");
 
         var mesh = cubeWallMesh;
 		var origvtx = mesh.vertices;
 		var destvtx = new Vector3[origvtx.Length];
-
-        Vector3 scale = new Vector3(wallSizeScale,1,wallSizeScale);
-        Vector3 xform = new Vector3(0,wallHeight,0);
+        Vector3 xform = new Vector3(0,height,0);
 
         for (int i = 0; i < origvtx.Length; i++) {
-            var localscale = scale;
+            var localscale = scale3;
             if (origvtx[i].y <= 0) localscale.y = 1;
-			destvtx[i] = Vector3.Scale(origvtx[i], scale);
+			destvtx[i] = Vector3.Scale(origvtx[i], localscale);
         }
 
         mesh.vertices = destvtx;
         mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
         cubeWallMesh = mesh;
     }
 
@@ -269,7 +266,7 @@ public class main : MonoBehaviour
         );
 
         origin = (planeSize * 0.5f) - planeSize;
-        origin.z = 0;
+        origin.y = 0;
 
         var plane = GameObject.Instantiate(floorPrefab, floorzone.xformObj.transform);
         floorzone.floor = plane;
@@ -291,6 +288,7 @@ public class main : MonoBehaviour
 
         mesh.vertices = destvtx;
         mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
 
         plane.GetComponent<BoxCollider>().size   = planeSize;
         plane.GetComponent<BoxCollider>().center = new Vector3(0, miny, 0);
@@ -301,6 +299,7 @@ public class main : MonoBehaviour
     }
 
     public void BuildMap(FloorZone floor, string[] map) {
+        BuildCubeWallMesh(new Vector2(4,4), 5);
         BuildFloor(floor);
 
         transform.position = new Vector3(0,0,origin.x);
@@ -314,16 +313,17 @@ public class main : MonoBehaviour
                 if (map[y][x] == 'A' || map[y][x] == 'B') continue;
                 if (map[y][x] == ' ') continue;
 
+                // TODO: optimize - create raw gameobject and bind MeshFilter and BoxCollider procedurally...
+
                 var startpos = TranslateGridCoordToWorld(new int2(x,y));
-                //startpos.y -= cubeWallPrefab.transform.localScale.y * 0.50f;        // to workaround the origin of cubeWallPrefab being centered rather than at the foot/base of the model
                 var newcube  = Instantiate(cubeWallPrefab, floor.xformObj.transform);
+                newcube.GetComponent<MeshFilter>().mesh = cubeWallMesh;
                 floor.walls.Add(newcube);
                 newcube.transform.localPosition = startpos;
                 newcube.transform.localRotation = Quaternion.identity; // Quaternion.AngleAxis(90, Vector3.right);
                 newcube.tag                     = "DynamicLevelObject";
             }
         }
-        LevelScaleCubes(floor, wallSizeScale);
     }
 
     public void RunDefinedCourse()
@@ -388,8 +388,6 @@ public class main : MonoBehaviour
         if (restartPathRunner) {
             SetupAvatars();
         }
-
-        LevelScaleCubes(GlobalPool.floors[0], wallSizeScale);
 
         // reset button-like toggles to 0
         rebuildMap = false;
