@@ -27,7 +27,7 @@ public class FloorClickListener : MonoBehaviour
         }
 
         var ray   = cam.ScreenPointToRay(msepos);
-        var plane = new Plane(gameObject.transform.forward, gameObject.transform.position);
+        var plane = new Plane(gameObject.transform.up, gameObject.transform.position);
 
         if (plane.Raycast(ray, out var enter))
         {
@@ -41,9 +41,9 @@ public class FloorClickListener : MonoBehaviour
             // cast a ray straight down toward the gameboard.
 
             //Debug.DrawRay(stickatar.transform.position, -gameObject.transform.up * 20, Color.red, 100);
-            //Debug.DrawRay(stickatar.transform.position - (gameObject.transform.forward*5), gameObject.transform.forward * 20, Color.red, 100);
+            //Debug.DrawRay(stickatar.transform.position - (gameObject.transform.up*5), gameObject.transform.up * 20, Color.red, 100);
 
-            var stickray = new Ray(stickatar.transform.position - (gameObject.transform.forward*5), gameObject.transform.forward);
+            var stickray = new Ray(stickatar.transform.position - (gameObject.transform.up*5), gameObject.transform.up);
             if (plane.Raycast(stickray, out var stickrayintersect)) {
                 var invpos = stickatar.transform.parent.InverseTransformPoint(stickray.GetPoint(stickrayintersect));
                 var stickcoord = main.TranslateWorldCoordToGrid(invpos);
@@ -89,7 +89,7 @@ public class FloorClickListener : MonoBehaviour
         if (cam is null) return;
 
         var ray   = cam.ScreenPointToRay(Input.mousePosition);
-        var plane = new Plane(gameObject.transform.up, gameObject.transform.position);
+        var plane = new Plane(gameObject.transform.forward, gameObject.transform.position);
 
         if (plane.Raycast(ray, out var enter))
         {
@@ -126,7 +126,7 @@ public class FloorClickListener : MonoBehaviour
         }
 
         var ray   = cam.ScreenPointToRay(msepos);
-        var plane = new Plane(gameObject.transform.forward, gameObject.transform.position);
+        var plane = new Plane(gameObject.transform.up, gameObject.transform.position);
         
         //Debug.DrawLine(gameObject.transform.position, gameObject.transform.up * 50, Color.cyan); 
         //Debug.DrawRay(ray.origin, ray.direction*250, Color.cyan, 25);
@@ -152,7 +152,7 @@ public class FloorClickListener : MonoBehaviour
             if (target.x >= GlobalPool.map[0].Length) return;
             var meh = main.TranslateGridCoordToWorld(target);
             main.tileSelector.transform.localPosition = new Vector3(
-                meh.x, meh.y, 0
+                meh.x, 0, meh.z
             );
         }
     }

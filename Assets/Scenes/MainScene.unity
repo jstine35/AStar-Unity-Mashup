@@ -237,13 +237,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 198074382}
-  m_LocalRotation: {x: 0.89320195, y: -0.03932522, z: -0.41910204, w: 0.15810554}
+  m_LocalRotation: {x: 0.77932286, y: 0.111645356, z: -0.40586734, w: 0.4641799}
   m_LocalPosition: {x: 47.559956, y: 21.568235, z: 29.544239}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1954805491}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 14.4470005, y: -128.18901, z: -167.91301}
+  m_LocalEulerAnglesHint: {x: 54.500004, y: -114.371, z: -159.56201}
 --- !u!108 &198074384
 Light:
   m_ObjectHideFlags: 0
@@ -447,6 +447,7 @@ MonoBehaviour:
     type: 3}
   gameWorldTransform: {fileID: 1954805489}
   tileSizeUnits: 4
+  cubeWallHeight: 5
   wallSizeScale: 0.9
   origin: {x: 0, y: 0, z: 0}
   MapFile: Assets/MapData/cube1.ascmap
