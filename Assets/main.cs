@@ -105,10 +105,15 @@ public class main : MonoBehaviour
     [Tooltip("Restart the built-in path runner.")]
     public bool restartPathRunner;
     
+
     public Vector3 MapGridScale            => new Vector3(tileSizeUnits, 1, tileSizeUnits);
     public Vector3 MapGridTransToOrigin    => new Vector3(tileSizeUnits, 1, tileSizeUnits);
     public Vector3 MapGridTransToOriginInv => new Vector3(1.0f/tileSizeUnits, 1, 1.0f/tileSizeUnits);
-    
+
+    public Vector2 MapGridSize2            => new Vector2(tileSizeUnits,    tileSizeUnits);
+    public Vector3 MapGridSize3            => new Vector3(tileSizeUnits, 0, tileSizeUnits);
+    public Vector3 CubeWallHeight3         => new Vector3(0, cubeWallHeight, 0);
+
     public static GameObject tileSelector;
 
     private string[] map = GlobalPool.map;
@@ -198,6 +203,7 @@ public class main : MonoBehaviour
     void Start()
     {
         tileSelector = GameObject.Instantiate(tileSelectorPrefab, GlobalPool.floors[0].xformObj.transform);
+        UnitMesh.ScaleGO(tileSelector, MapGridSize3 + (CubeWallHeight3 * 1.1f));
 
         ReloadMaps();
         SetupAvatars();
@@ -223,35 +229,21 @@ public class main : MonoBehaviour
         visibleWallSizeScale = Vector3.zero;
     }
 
+    Mesh cubeWallUnitMesh;    
     Mesh cubeWallMesh;
 
     public void BuildCubeWallMesh(Vector2 size, float height) {
-        if (cubeWallMesh == null) {
-            cubeWallMesh = Instantiate(cubeWallPrefab.GetComponent<MeshFilter>().sharedMesh);
+        if (cubeWallUnitMesh == null) {
+            cubeWallUnitMesh = Instantiate(cubeWallPrefab.GetComponent<MeshFilter>().sharedMesh);
         }
 
         var scale3 = new Vector3(size.x * wallSizeScale, cubeWallHeight, size.y * wallSizeScale);
-        var cubeScale = Vector3.Scale(MapGridScale, scale3);
-        if (visibleWallSizeScale == cubeScale) return;
-        visibleWallSizeScale = cubeScale;
+        if (visibleWallSizeScale == scale3) return;
+        visibleWallSizeScale = scale3;
 
         Debug.Log($"Rebuilding cubeWall scale = {visibleWallSizeScale}");
 
-        var mesh = cubeWallMesh;
-		var origvtx = mesh.vertices;
-		var destvtx = new Vector3[origvtx.Length];
-        Vector3 xform = new Vector3(0,height,0);
-
-        for (int i = 0; i < origvtx.Length; i++) {
-            var localscale = scale3;
-            if (origvtx[i].y <= 0) localscale.y = 1;
-			destvtx[i] = Vector3.Scale(origvtx[i], localscale);
-        }
-
-        mesh.vertices = destvtx;
-        mesh.RecalculateNormals();
-        mesh.RecalculateBounds();
-        cubeWallMesh = mesh;
+        cubeWallMesh = UnitMesh.Scale(cubeWallUnitMesh, scale3);
     }
 
     // resulting floor mesh is built following Y-up convention.
@@ -299,7 +291,7 @@ public class main : MonoBehaviour
     }
 
     public void BuildMap(FloorZone floor, string[] map) {
-        BuildCubeWallMesh(new Vector2(4,4), 5);
+        BuildCubeWallMesh(MapGridSize2, cubeWallHeight);
         BuildFloor(floor);
 
         transform.position = new Vector3(0,0,origin.x);
