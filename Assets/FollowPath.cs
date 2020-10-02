@@ -163,12 +163,16 @@ public class FollowPath : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        Gizmos.color = Color.green;
-        Gizmos.DrawSphere(transform.parent.TransformPoint(currentTarget), 1.2f);
+        if (currentTarget != null) {
+            Gizmos.color = Color.green;
+            Gizmos.DrawSphere(transform.TransformPoint(currentTarget), 1.2f);
+        }
         
-        Gizmos.color = Color.yellow;
-        foreach(var waypoint in waypoints) {
-            Gizmos.DrawSphere(transform.parent.TransformPoint(waypoint), 0.4f);
+        if (waypoints != null) {
+            Gizmos.color = Color.yellow;
+            foreach(var waypoint in waypoints) {
+                Gizmos.DrawSphere(transform.TransformPoint(waypoint), 0.4f);
+            }
         }
     }
 

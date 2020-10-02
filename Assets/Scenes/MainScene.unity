@@ -364,7 +364,7 @@ Camera:
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_RenderingPath: -1
+  m_RenderingPath: 1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
@@ -401,11 +401,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09acbb99e2a950a4898d524b4aa22fe0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ZoomLevel: 1
-  ZoomAngle: 1
-  RotationSpeed: 120
-  PerspectiveAnglesLo: {x: 66, y: 6}
-  PerspectiveAnglesHi: {x: 30, y: 2}
+  zoomLevel: 0
+  lookAtTargetPos: {x: 0, y: 0, z: 0}
+  cameraHeights:
+  - -12
+  - -24
+  cameraRadiuses:
+  - 12
+  - 24
+  rotationSpeed: 120
   gameBoard: {fileID: 0}
 --- !u!1 &1096255666
 GameObject:

@@ -4,49 +4,76 @@ using UnityEngine;
 
 public class SpinZoomListener : MonoBehaviour
 {
-    bool    lastMouseIsSpinning = false;
-    Vector3 lastMouseSpinViewPos;
-    Quaternion spinOrient;
-    float      spinOrientZ;
-
     public enum ZoomViewAngle {
         LowPersp,
         HighPersp,
     }
     
+#region Public Fields (Unity Editable)
     [Range(1.0f, 3.0f)]
-    public int ZoomLevel;
-    public ZoomViewAngle ZoomAngle;
+    public int zoomLevel = 0;
+    public Vector3 lookAtTargetPos;
 
-    public float RotationSpeed = 120.0f;
-    public Vector2 PerspectiveAnglesLo = new Vector2(50.0f, 36.0f);
-    public Vector2 PerspectiveAnglesHi = new Vector2(30.0f, 18.0f);
+    public float[] cameraHeights = new float[2] {
+        -8.0f,
+        -21.0f
+    };
 
+    public float[] cameraRadiuses = new float[2] {
+        12.0f,
+        24.0f
+    };
+
+    public float rotationSpeed = 120.0f;
     public GameObject gameBoard = null;
-    
-    Vector2 persp_angles_curr;
-    Vector2 persp_angles_targ;
+#endregion
 
+    bool        lastMouseIsSpinning = false;
+    Vector3     lastMouseSpinViewPos;
+    Quaternion  spinOrient;
+    float       spinOrientY = 45;
+
+    float       curr_CameraHeight;
+    float       curr_CameraRadius;
+    float       targ_CameraHeight;
+    float       targ_CameraRadius;
+
+    int       cursel_Height = 0;
+    int       cursel_Radius = 0;
+
+    public float CurrentCameraHeight { get => curr_CameraHeight; }
+    public float CurrentCameraRadius { get => curr_CameraRadius; }
+
+    
     void ApplyOrientation() {
-        var board = (gameBoard == null) ? GlobalPool.floors[0].floor : gameBoard;
-        var lrot = Quaternion.Euler(persp_angles_curr.x, persp_angles_curr.y, 0);
-        var axis = lrot * board.transform.up;
-        Debug.DrawRay(board.transform.position, axis*50, Color.red, 9);
-        gameObject.transform.localRotation = Quaternion.AngleAxis(spinOrientZ, Vector3.up) * Quaternion.Euler(persp_angles_curr.x, persp_angles_curr.y, 0);
+        // position the camera according to radius and height settings.
+
+        var viewHeight = CurrentCameraHeight;
+        var radius     = CurrentCameraRadius;
+        gameObject.transform.position = new Vector3(radius, -viewHeight, 0);
+        gameObject.transform.RotateAround(Vector3.zero, Vector3.up, spinOrientY);
+
+        gameObject.transform.LookAt(lookAtTargetPos);
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        switch(ZoomAngle) {
-            case ZoomViewAngle.LowPersp : persp_angles_curr = PerspectiveAnglesLo ; break;
-            case ZoomViewAngle.HighPersp: persp_angles_curr = PerspectiveAnglesHi ; break;
-        }
+        curr_CameraHeight = cameraHeights [cursel_Height];
+        curr_CameraRadius = cameraRadiuses[cursel_Radius];
 
-        var xform = gameObject.transform;
-        persp_angles_targ = persp_angles_curr;
-        var angles = xform.localRotation.eulerAngles;
-        xform.localRotation = Quaternion.Euler(persp_angles_curr.x, persp_angles_curr.y, angles.z);
+        targ_CameraHeight = cameraHeights [cursel_Height];
+        targ_CameraRadius = cameraRadiuses[cursel_Radius];
+        ApplyOrientation();
+    }
+
+    public void MoveTowards(ref float curr, ref float targ, float delta) {
+        if (targ != curr) {
+            curr = Mathf.MoveTowards(curr, targ, rotationSpeed * Time.deltaTime);
+            if (Mathf.Abs(targ - curr) < 0.01f) {
+                curr = targ;
+            }
+        }
     }
 
     // Update is called once per frame
@@ -54,14 +81,14 @@ public class SpinZoomListener : MonoBehaviour
     {
         bool doSpin = false;
         if (Input.GetKeyDown("z")) {
-            ZoomLevel = (ZoomLevel % 3) + 1; 
+            zoomLevel = (zoomLevel % 3) + 1; 
         }
 
         var cam = gameObject.GetComponent<Camera>();
 
         if (cam != null) {
-            ZoomLevel = Mathf.Clamp(ZoomLevel, 1, 3);
-            switch(ZoomLevel) {
+            zoomLevel = Mathf.Clamp(zoomLevel, 1, 3);
+            switch(zoomLevel) {
                 case 1: cam.orthographicSize = 36; break;
                 case 2: cam.orthographicSize = 26; break;
                 case 3: cam.orthographicSize = 18; break;
@@ -71,23 +98,17 @@ public class SpinZoomListener : MonoBehaviour
         var xform = gameObject.transform;
 
         if (Input.GetKeyDown("x")) {
-            switch(ZoomAngle) {
-                case ZoomViewAngle.LowPersp : ZoomAngle = ZoomViewAngle.HighPersp; break;
-                case ZoomViewAngle.HighPersp: ZoomAngle = ZoomViewAngle.LowPersp ; break;
-            }
-            
-            switch(ZoomAngle) {
-                case ZoomViewAngle.LowPersp  : persp_angles_targ = PerspectiveAnglesLo; break;
-                case ZoomViewAngle.HighPersp : persp_angles_targ = PerspectiveAnglesHi; break;
-            }
+            cursel_Height = (cursel_Height + 1) % cameraHeights.Length;
+            targ_CameraHeight = cameraHeights[cursel_Height];
         }
         
-        if (persp_angles_targ != persp_angles_curr) {
-            persp_angles_curr = Vector2.MoveTowards(persp_angles_curr, persp_angles_targ, RotationSpeed * Time.deltaTime);
-            if (Vector2.Distance(persp_angles_curr, persp_angles_targ) < 0.01f) {
-                persp_angles_curr = persp_angles_targ;
-            }
+        if (Input.GetKeyDown("c")) {
+            cursel_Radius = (cursel_Radius + 1) % cameraRadiuses.Length;
+            targ_CameraRadius = cameraRadiuses[cursel_Radius];
         }
+
+        MoveTowards(ref curr_CameraHeight, ref targ_CameraHeight, rotationSpeed);
+        MoveTowards(ref curr_CameraRadius, ref targ_CameraRadius, rotationSpeed);
 
         if (Input.GetKey("left ctrl")) {
             if (Input.GetMouseButton(0)) {
@@ -97,7 +118,7 @@ public class SpinZoomListener : MonoBehaviour
                 }
                 else {
                     var delta = Input.mousePosition - lastMouseSpinViewPos;
-                    spinOrientZ += delta.x / 6;
+                    spinOrientY += delta.x / 6;
                 }
                 lastMouseSpinViewPos = Input.mousePosition;
             }
