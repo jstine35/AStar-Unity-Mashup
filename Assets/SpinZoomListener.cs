@@ -69,7 +69,6 @@ public class SpinZoomListener : MonoBehaviour
 
     bool        lastMouseIsSpinning = false;
     Vector3     lastMouseSpinViewPos;
-    Quaternion  spinOrient;
     float       spinOrientY = 45;
 
     MoveTowardsPair  ViewAngle;
