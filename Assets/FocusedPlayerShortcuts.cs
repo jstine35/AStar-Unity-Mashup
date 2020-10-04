@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
+
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.ShortcutManagement;
+#endif
 
 // Usage:
 //  * Download or copy/paste and attach this component to a scene management object in your scene.
@@ -13,7 +16,10 @@ using UnityEditor.ShortcutManagement;
 //   Player profile manually, and possibly for every install of Unity.
 
 
+#if UNITY_EDITOR
 [InitializeOnLoad]
+#endif
+
 public class FocusedPlayerShortcuts : MonoBehaviour
 {
     [Tooltip("Create a playing profile using Edit->Shortcuts")]
@@ -21,6 +27,7 @@ public class FocusedPlayerShortcuts : MonoBehaviour
 
     private static string LastEditorProfileId;
 
+#if UNITY_EDITOR
     private static void SetActiveProfile(string profileId)
     {
         Debug.Log($"Activating Shortcut profile '{profileId}'");
@@ -90,4 +97,5 @@ public class FocusedPlayerShortcuts : MonoBehaviour
             LastEditorProfileId = null;
         }
     }
+    #endif
 }
