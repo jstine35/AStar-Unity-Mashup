@@ -1,26 +1,32 @@
-﻿using UnityEngine;
+﻿// Summary
+//  Disables Editor Keyboard Behavior when Unity Player has focus, so your game can handle CTRL and 
+//  without corrupting your scene.
+//
+// Usage
+//  * Download or copy/paste and attach this component to a scene management object in your scene.
+//  * Create a new shortcut profile using Edit->Shortcuts (tedious, you need to pretty much click every
+//    button and remove every keystroke, one by one).
+//
+// Remarks
+//   Editor preferences are stored in the Registry so there's no lightweight way to transfer them to
+//   other members on your team. Pretty much, everyone needs to perform the tedious step of creating a
+//   Player profile manually, and possibly for every install of Unity.
+//
+// Author: Jake Stine  (@MysteriousNixon)
+// GIST URL: https://gist.github.com/jstine35/2a0b491cb1c1822debbc2571b487ad8d
+
+using UnityEngine;
 
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.ShortcutManagement;
 #endif
 
-// Usage:
-//  * Download or copy/paste and attach this component to a scene management object in your scene.
-//  * Create a new shortcut profile using Edit->Shortcuts (tedious, you need to pretty much click every
-//    button and remove every keystroke, one by one).
-//
-// Remarks:
-//   Editor preferences are stored in the Registry so there's no lightweight way to transfer them to
-//   other members on your team. Pretty much, everyone needs to perform the tedious step of creating a
-//   Player profile manually, and possibly for every install of Unity.
-
-
 #if UNITY_EDITOR
 [InitializeOnLoad]
 #endif
 
-public class FocusedPlayerShortcuts : MonoBehaviour
+public class SwapEditorShortcutsOnPlayerFocus : MonoBehaviour
 {
     [Tooltip("Create a playing profile using Edit->Shortcuts")]
     public string PlayingProfileId = "Playing";
@@ -46,7 +52,7 @@ public class FocusedPlayerShortcuts : MonoBehaviour
             newProfileId = PlayingProfileId;
 
             if (string.IsNullOrEmpty(newProfileId)) {
-                Debug.Log($"PlayingProfileId is empty. Disable component FocusedPlayerShortcuts to silence this warning.");
+                Debug.Log($"PlayingProfileId is empty. Disable component SwapEditorShortcutsOnPlayerFocus to silence this warning.");
                 return;
             }
 
@@ -74,7 +80,7 @@ public class FocusedPlayerShortcuts : MonoBehaviour
     //   fail to send in-game  OnApplicationFocus() callbacks. I haven't specifically seen a case where it
     //   happens, but it's not unreasonable to think it could happen during some attached-debugging operations.
 
-    static FocusedPlayerShortcuts() {
+    static SwapEditorShortcutsOnPlayerFocus() {
         EditorApplication.playModeStateChanged += DetectEditorPlayModeState;
         EditorApplication.pauseStateChanged    += DetectEditorPauseState;
     }

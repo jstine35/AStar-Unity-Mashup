@@ -18,7 +18,7 @@ public struct MoveTowardsPair {
     public void SetTarget(float newval) => targ = newval;
 
     public void SetTarget(float newval, float time_to_target) {
-        move_per_sec = (curr - newval) / time_to_target;
+        move_per_sec = Mathf.Abs(newval - curr) / time_to_target;
         targ = newval;
     }
 
@@ -64,8 +64,7 @@ public class SpinZoomListener : MonoBehaviour
         36
     };
 
-    public float rotationSpeed = 120.0f;
-    public GameObject gameBoard = null;
+    public float rotationTime = 0.25f;
 #endregion
 
     bool        lastMouseIsSpinning = false;
@@ -112,14 +111,14 @@ public class SpinZoomListener : MonoBehaviour
         bool doSpin = false;
         if (Input.GetKeyDown("z")) {
             cursel_Size = (cursel_Size + 1) % viewSizes.Length;
-            ViewSize.SetTarget(viewSizes[cursel_Size], 0.5f);
+            ViewSize.SetTarget(viewSizes[cursel_Size], rotationTime);
         }
 
         var xform = gameObject.transform;
 
         if (Input.GetKeyDown("x")) {
             cursel_Angle = (cursel_Angle + 1) % viewAngles.Length;
-            ViewAngle.SetTarget(viewAngles[cursel_Angle], 0.5f);
+            ViewAngle.SetTarget(viewAngles[cursel_Angle], rotationTime);
         }
         
         ViewAngle.Update();

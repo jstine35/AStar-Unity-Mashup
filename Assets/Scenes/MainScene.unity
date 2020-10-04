@@ -409,8 +409,7 @@ MonoBehaviour:
   - 18
   - 26
   - 36
-  rotationSpeed: 30
-  gameBoard: {fileID: 0}
+  rotationTime: 0.25
 --- !u!1 &1096255666
 GameObject:
   m_ObjectHideFlags: 0
