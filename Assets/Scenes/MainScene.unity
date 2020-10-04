@@ -401,15 +401,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09acbb99e2a950a4898d524b4aa22fe0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  zoomLevel: 0
   lookAtTargetPos: {x: 0, y: 0, z: 0}
-  cameraHeights:
-  - -12
-  - -24
-  cameraRadiuses:
-  - 12
+  viewAngles:
   - 24
-  rotationSpeed: 120
+  - 45
+  viewSizes:
+  - 18
+  - 26
+  - 36
+  rotationSpeed: 30
   gameBoard: {fileID: 0}
 --- !u!1 &1096255666
 GameObject:

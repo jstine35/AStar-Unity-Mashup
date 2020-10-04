@@ -2,6 +2,47 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public struct MoveTowardsPair {
+    public float curr;
+    public float targ;
+    public float move_per_sec;
+
+    public static implicit operator float(MoveTowardsPair pair) => pair.curr;
+
+    public MoveTowardsPair(float initial) {
+        curr = initial;
+        targ = initial;
+        move_per_sec = 0;
+    }
+
+    public void SetTarget(float newval) => targ = newval;
+
+    public void SetTarget(float newval, float time_to_target) {
+        move_per_sec = (curr - newval) / time_to_target;
+        targ = newval;
+    }
+
+    public void SetImm(float newval) {
+        curr = newval;
+        targ = newval;
+    }
+
+    public void Update() {
+        Debug.Assert(move_per_sec == 0, $"to use Update() API, SetTarget() call must include a time_to_target value");
+        MoveBy(move_per_sec);
+    }
+
+    public void MoveBy(float delta) {
+        if (targ == curr) return;
+        curr = Mathf.MoveTowards(curr, targ, delta * Time.deltaTime);
+        if (Mathf.Abs(targ - curr) < 0.01f) {
+            curr = targ;
+        }
+    }
+
+};
+
+
 public class SpinZoomListener : MonoBehaviour
 {
     public enum ZoomViewAngle {
@@ -10,18 +51,17 @@ public class SpinZoomListener : MonoBehaviour
     }
     
 #region Public Fields (Unity Editable)
-    [Range(1.0f, 3.0f)]
-    public int zoomLevel = 0;
     public Vector3 lookAtTargetPos;
 
-    public float[] cameraHeights = new float[2] {
-        -8.0f,
-        -21.0f
+    public float[] viewAngles = new float[] {
+        24,
+        45
     };
 
-    public float[] cameraRadiuses = new float[2] {
-        12.0f,
-        24.0f
+    public float[] viewSizes = new float[] {
+        18,
+        26,
+        36
     };
 
     public float rotationSpeed = 120.0f;
@@ -33,47 +73,37 @@ public class SpinZoomListener : MonoBehaviour
     Quaternion  spinOrient;
     float       spinOrientY = 45;
 
-    float       curr_CameraHeight;
-    float       curr_CameraRadius;
-    float       targ_CameraHeight;
-    float       targ_CameraRadius;
+    MoveTowardsPair  ViewAngle;
+    MoveTowardsPair  ViewSize;
 
-    int       cursel_Height = 0;
-    int       cursel_Radius = 0;
+    int       cursel_Angle = 0;
+    int       cursel_Size = 0;
 
-    public float CurrentCameraHeight { get => curr_CameraHeight; }
-    public float CurrentCameraRadius { get => curr_CameraRadius; }
-
-    
     void ApplyOrientation() {
-        // position the camera according to radius and height settings.
+        // position the camera according to view angle and view size.
+        // view size becomes the radius, or right-triangle leg perpendicular to the Y axis.
+        // Combined with angle, we can calculate the second leg, which is height.
+        // legA = legB * tan(theta)  // some law of trig!
 
-        var viewHeight = CurrentCameraHeight;
-        var radius     = CurrentCameraRadius;
-        gameObject.transform.position = new Vector3(radius, -viewHeight, 0);
+        var radius      = ViewSize;
+        var height      = radius * Mathf.Tan(ViewAngle * Mathf.Deg2Rad);
+
+        gameObject.transform.position = new Vector3(radius, height, 0);
         gameObject.transform.RotateAround(Vector3.zero, Vector3.up, spinOrientY);
 
         gameObject.transform.LookAt(lookAtTargetPos);
+
+        var cam = GetComponent<Camera>();
+        cam.orthographicSize = ViewSize;
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        curr_CameraHeight = cameraHeights [cursel_Height];
-        curr_CameraRadius = cameraRadiuses[cursel_Radius];
+        ViewAngle.SetImm(viewAngles [cursel_Angle] );
+        ViewSize .SetImm(viewSizes  [cursel_Size ] );
 
-        targ_CameraHeight = cameraHeights [cursel_Height];
-        targ_CameraRadius = cameraRadiuses[cursel_Radius];
         ApplyOrientation();
-    }
-
-    public void MoveTowards(ref float curr, ref float targ, float delta) {
-        if (targ != curr) {
-            curr = Mathf.MoveTowards(curr, targ, rotationSpeed * Time.deltaTime);
-            if (Mathf.Abs(targ - curr) < 0.01f) {
-                curr = targ;
-            }
-        }
     }
 
     // Update is called once per frame
@@ -81,34 +111,19 @@ public class SpinZoomListener : MonoBehaviour
     {
         bool doSpin = false;
         if (Input.GetKeyDown("z")) {
-            zoomLevel = (zoomLevel % 3) + 1; 
-        }
-
-        var cam = gameObject.GetComponent<Camera>();
-
-        if (cam != null) {
-            zoomLevel = Mathf.Clamp(zoomLevel, 1, 3);
-            switch(zoomLevel) {
-                case 1: cam.orthographicSize = 36; break;
-                case 2: cam.orthographicSize = 26; break;
-                case 3: cam.orthographicSize = 18; break;
-            }
+            cursel_Size = (cursel_Size + 1) % viewSizes.Length;
+            ViewSize.SetTarget(viewSizes[cursel_Size], 0.5f);
         }
 
         var xform = gameObject.transform;
 
         if (Input.GetKeyDown("x")) {
-            cursel_Height = (cursel_Height + 1) % cameraHeights.Length;
-            targ_CameraHeight = cameraHeights[cursel_Height];
+            cursel_Angle = (cursel_Angle + 1) % viewAngles.Length;
+            ViewAngle.SetTarget(viewAngles[cursel_Angle], 0.5f);
         }
         
-        if (Input.GetKeyDown("c")) {
-            cursel_Radius = (cursel_Radius + 1) % cameraRadiuses.Length;
-            targ_CameraRadius = cameraRadiuses[cursel_Radius];
-        }
-
-        MoveTowards(ref curr_CameraHeight, ref targ_CameraHeight, rotationSpeed);
-        MoveTowards(ref curr_CameraRadius, ref targ_CameraRadius, rotationSpeed);
+        ViewAngle.Update();
+        ViewSize .Update();
 
         if (Input.GetKey("left ctrl")) {
             if (Input.GetMouseButton(0)) {

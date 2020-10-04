@@ -7,7 +7,7 @@ using UnityEngine;
 using AStar;
 using UnityEditor;
 
-public static class Extensions {
+public static partial class PartialExtensions {
     public static double GetUnixTimeSecs(this System.DateTime date) {
         return new System.DateTimeOffset(date).ToUnixTimeMilliseconds() / 1000.0;
     }
