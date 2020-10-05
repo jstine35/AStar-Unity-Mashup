@@ -50,11 +50,13 @@ public class FloorClickListener : MonoBehaviour
                 var start  = new int2((int)(stickcoord.x), (int)(stickcoord.y));
                 var target = new int2((int)(coord.x), (int)(coord.y));
 
-                if (target.x < 0 || target.y < 0) return;
-                if (target.y >= GlobalPool.map.Length) return;
-                if (target.x >= GlobalPool.map[0].Length) return;
+                var map = FloorZone.Current.Map;
 
-                var path_iter = Yieldable.FindPath(GlobalPool.map, GlobalPool.yieldablePathState, start, target);
+                if (target.x < 0 || target.y < 0) return;
+                if (target.y >= map.Length) return;
+                if (target.x >= map[0].Length) return;
+
+                var path_iter = Yieldable.FindPath(map, GlobalPool.yieldablePathState, start, target);
                 GlobalPool.yPathWaypoints.Clear();
                 GlobalPool.AppendWaypoints(path_iter);
                 
@@ -147,9 +149,11 @@ public class FloorClickListener : MonoBehaviour
             dbg_DbgPoint3 = epoint;
             dbg_DbgPointInv = inv;
             
+            var map = FloorZone.Current.Map;
+
             if (target.x < 0 || target.y < 0) return;
-            if (target.y >= GlobalPool.map.Length) return;
-            if (target.x >= GlobalPool.map[0].Length) return;
+            if (target.y >= map.Length) return;
+            if (target.x >= map[0].Length) return;
             var meh = main.TranslateGridCoordToWorld(target);
             main.tileSelector.transform.localPosition = new Vector3(
                 meh.x, 0, meh.z

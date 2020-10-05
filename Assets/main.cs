@@ -16,19 +16,41 @@ public static partial class PartialExtensions {
 public class FloorZone {
     public GameObject       xformObj;
     public GameObject       floor;
+    public int              map_id;     // indexes GlobalPool.maps[]
     public List<GameObject> walls = new List<GameObject>();
+
+    public string[] Map => GlobalPool.maps[map_id]?.rows;
+
+    public static FloorZone Current => GlobalPool.CurrentFloor;
+}
+
+public class MapData {
+    public string[] rows;
+    public int2 Size => new int2(rows[0].Length, rows.Length);
+
+    public MapData(string[] data) {
+        rows = data;
+    }
+
+    public char this[int x, int y] {
+        get => rows[y][x];
+        //set => rows[y][x] = value;        // enable this after switching from string[]
+    }
 }
 
 public static class GlobalPool {
     public static Yieldable.PathState yieldablePathState = new Yieldable.PathState();
     public static List<int2> yPathWaypoints = new List<int2>(48);
-    public static string[] map;
+    public static MapData[] maps = new MapData[16];
 
     public static void AppendWaypoints(IEnumerable<int2> yieldable_path) {
         YPath.AppendWaypoints(yieldable_path, ref yPathWaypoints);
     }
 
     public static FloorZone[] floors = new FloorZone[4];
+
+    public static int currentFloorId;
+    public static FloorZone CurrentFloor => floors[currentFloorId];
 }
 
 public static class YPath {
@@ -116,7 +138,7 @@ public class main : MonoBehaviour
 
     public static GameObject tileSelector;
 
-    private string[] map = GlobalPool.map;
+    private string[] curmap;
 
     public Vector3 TranslateGridCoordToWorld(int2 coord) {
         var vec = Vector3.Scale(new Vector3(coord.x + 0.5f, 0, coord.y + 0.5f), MapGridTransToOrigin);
@@ -131,8 +153,10 @@ public class main : MonoBehaviour
 
     void SetupAvatars()
     {
-        var start  = AsciiMap.Find(map, 'A');
-        var target = AsciiMap.Find(map, 'B');
+        if (curmap == null) return;
+
+        var start  = AsciiMap.Find(curmap, 'A');
+        var target = AsciiMap.Find(curmap, 'B');
 
         var stickatar = GameObject.Find("Stickatar");
         var targatar  = GameObject.Find("Targatar");
@@ -142,6 +166,11 @@ public class main : MonoBehaviour
         
         stickatar.transform.localPosition = TranslateGridCoordToWorld(start);
         targatar .transform.localPosition = TranslateGridCoordToWorld(target);
+    }
+
+    bool IsMapChanged(MapData dest, IList<string> src) {
+        if (dest == null || dest.rows == null) return true;
+        return IsMapChanged(dest.rows, src);
     }
 
     bool IsMapChanged(string[] dest, IList<string> src) {
@@ -166,23 +195,32 @@ public class main : MonoBehaviour
             var line = reader.ReadLine();
             if (string.IsNullOrWhiteSpace(line)) {
                 newmaps.Add(newmap);
-                newmap.Clear();
+                newmap = new List<string>();
             }
             else {
                 newmap.Add(line);
             }
         }
 
-        if (IsMapChanged(GlobalPool.map, newmaps[0])) {
-            Debug.Log($"Applying new data for map panel 1");
-            GlobalPool.map = newmaps[0].ToArray();
-            map = GlobalPool.map;
-            DestroyMap(0);
-            BuildMap(0, map);
+        for (int i=0; i<4; ++i) {
+            if (i >= newmaps.Count) break;
+            if (newmaps[i] == null) continue;
+            if (IsMapChanged(GlobalPool.maps[i], newmaps[i])) {
+                Debug.Log($"Applying new data for map panel {i}");
+                GlobalPool.maps[i] = new MapData(newmaps[i].ToArray());
+            }
         }
 
-        //DestroyMap(1);
-        //BuildMap(1, newmaps[1].ToArray());
+        for (int i=0; i<4; ++i) {
+            DestroyMap(i);
+            BuildMap(i);
+        }
+
+        SetFloorOrientations();
+        SetActiveFloor(0);
+
+        // hack - eventually we need better logic to determine global map.
+        curmap = GlobalPool.maps[0].rows;
     }
 
     void UpdateStaleAssets() {
@@ -200,6 +238,37 @@ public class main : MonoBehaviour
         }
     }
 
+
+    void SetFloorOrientations() {
+        // Sanity checks:
+        //   top and bottom maps should be identical sizes.
+        //   left and right maps should be identical sizes.
+        //   top.y == right.y
+
+        //    var size = new Vector2(map[0].Length, map.Length);
+
+        var map = GlobalPool.floors[0].Map;
+        var size = new Vector2(map[0].Length, map.Length);
+
+        var centroid = Vector3.zero;
+        var angle = 0;
+        for(int i=0; i<GlobalPool.floors.Length; ++i) {
+            if (GlobalPool.floors[i].xformObj == null) continue;
+            var xform = GlobalPool.floors[i].xformObj.transform;
+            xform.localPosition = Vector3.up * (size.x * MapGridSize2.x) / 2;
+            xform.RotateAround(Vector3.zero, Vector3.forward, angle);
+            xform.localRotation = Quaternion.AngleAxis(angle, Vector3.forward);
+            angle -= 90;
+        }
+    }
+
+    void SetActiveFloor(int floor_id) {
+        for(int i=0; i<GlobalPool.floors.Length; ++i) {
+            GlobalPool.floors[i].floor.GetComponent<SpinZoomListener>().enabled = (i == floor_id);
+        }
+        // TODO: Animate camera to focus on new floor ?
+    }
+
     void Start()
     {
         tileSelector = GameObject.Instantiate(tileSelectorPrefab, GlobalPool.floors[0].xformObj.transform);
@@ -207,7 +276,6 @@ public class main : MonoBehaviour
 
         ReloadMaps();
         SetupAvatars();
-        //RunDefinedCourse();
     }
 
     public void DestroyMap(int idx) {
@@ -225,8 +293,6 @@ public class main : MonoBehaviour
 
         floor.floor = null;
         floor.walls.Clear();
-
-        visibleWallSizeScale = Vector3.zero;
     }
 
     Mesh cubeWallUnitMesh;    
@@ -248,6 +314,9 @@ public class main : MonoBehaviour
 
     // resulting floor mesh is built following Y-up convention.
     public void BuildFloor(FloorZone floorzone) {
+        var map = floorzone.Map;
+        if (map == null) return;
+
         int2 map_size = new int2 { x = map[0].Length, y = map.Length };
 
         var planeUnitsAtScale1 = 1.0f;
@@ -286,24 +355,30 @@ public class main : MonoBehaviour
         plane.GetComponent<BoxCollider>().center = new Vector3(0, miny, 0);
     }
 
-    public void BuildMap(int floor_id, string[] map) {
-        BuildMap(GlobalPool.floors[floor_id], map);
+    public void BuildMap(int floor_id) {
+        GlobalPool.floors[floor_id].map_id = floor_id;
+        BuildMap(GlobalPool.floors[floor_id]);
     }
 
-    public void BuildMap(FloorZone floor, string[] map) {
+    public void BuildMap(int floor_id, int map_id) {
+        GlobalPool.floors[floor_id].map_id = map_id;
+        BuildMap(GlobalPool.floors[floor_id]);
+    }
+
+    public void BuildMap(FloorZone floor) {
         BuildCubeWallMesh(MapGridSize2, cubeWallHeight);
         BuildFloor(floor);
 
         transform.position = new Vector3(0,0,origin.x);
-
-        int2 map_size = new int2 { x = map[0].Length, y = map.Length };
+        var map = GlobalPool.maps[floor.map_id];
+        int2 map_size = map.Size;
 
         Debug.Log($"origin = {origin}");
 
         for (int y=0; y<map_size.y; ++y) {
             for (int x=0; x<map_size.x; ++x) {
-                if (map[y][x] == 'A' || map[y][x] == 'B') continue;
-                if (map[y][x] == ' ') continue;
+                if (map[x,y] == 'A' || map[x,y] == 'B') continue;
+                if (map[x,y] == ' ') continue;
 
                 // TODO: optimize - create raw gameobject and bind MeshFilter and BoxCollider procedurally...
 
@@ -322,6 +397,7 @@ public class main : MonoBehaviour
     {
         var curpos = new int2();
         var pathstate = new Yieldable.PathState();
+        var map = GlobalPool.floors[0].Map;
 
         foreach (var pos in Yieldable.FindPath(map, pathstate)) {
             curpos = pos;
@@ -373,8 +449,8 @@ public class main : MonoBehaviour
         }
 
         if (rebuildMap) {
-            DestroyMap(0);
-            BuildMap(0, map);
+            visibleWallSizeScale = Vector3.zero;
+            ReloadMaps();
         }
 
         if (restartPathRunner) {

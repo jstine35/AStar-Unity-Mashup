@@ -1,21 +1,21 @@
 +-----------------+
-|                 |
-|             X   |
-|            XX   |
-| Xxxxxxxxxxxxx   |
-|  x              |
-|x  x             |
-|x x         X    |
-|x x              |
-|  xA  X          |
-|  XXXXX  X   X   |
-| XX  XX  X       |
-| XXXXXX  X       |
-|    x  XX     X  |
-|   Bx X          |
-|xxxxx  XXXXX     |
+|xxx           xxx|
+|xx             xx|
+|x               x|
 |                 |
 |                 |
+|                 |
+|                 |
+|    A       B    |
+|                 |
+|                 |
+|                 |
+|                 |
+|                 |
+|                 |
+|x               x|
+|xx             xx|
+|xxx           xxx|
 +-----------------+
 
 +-----------------+
@@ -59,21 +59,42 @@
 +-----------------+
 
 +-----------------+
-|xxx           xxx|
-|xx             xx|
-|x               x|
-|                 |
-|                 |
-|                 |
-|                 |
-|    A       B    |
-|                 |
-|                 |
-|                 |
-|                 |
-|                 |
-|                 |
-|x               x|
-|xx             xx|
-|xxx           xxx|
+|x           xx   |
+|x            xx  |
+|xx            xx |
+| x    x        xx|
+| x   xxx        x|
+| xx xxxxx        |
+|  x     xxxx     |
+|  x        xxxx  |
+|  x           x  |
+|  xxxx        x  |
+|     xxxx     x  |
+|        xxxxx xx |
+|x        xxx   x |
+|xx        x    x |
+| xx            xx|
+|  xx            x|
+|   xx           x|
 +-----------------+
+
++-----------------+
+|                 |
+|             X   |
+|            XX   |
+| Xxxxxxxxxxxxx   |
+|  x              |
+|x  x             |
+|x x         X    |
+|x x              |
+|  xA  X          |
+|  XXXXX  X   X   |
+| XX  XX  X       |
+| XXXXXX  X       |
+|    x  XX     X  |
+|   Bx X          |
+|xxxxx  XXXXX     |
+|                 |
+|                 |
++-----------------+
+
