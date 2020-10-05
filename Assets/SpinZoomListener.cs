@@ -86,7 +86,7 @@ public class SpinZoomListener : MonoBehaviour
         var radius      = ViewSize;
         var height      = radius * Mathf.Tan(ViewAngle * Mathf.Deg2Rad);
 
-        gameObject.transform.position = new Vector3(radius, height, 0);
+        gameObject.transform.position = new Vector3(radius, height, 0) + lookAtTargetPos;
         gameObject.transform.RotateAround(Vector3.zero, Vector3.up, spinOrientY);
 
         gameObject.transform.LookAt(lookAtTargetPos);

@@ -264,7 +264,7 @@ public class main : MonoBehaviour
 
     void SetActiveFloor(int floor_id) {
         for(int i=0; i<GlobalPool.floors.Length; ++i) {
-            GlobalPool.floors[i].floor.GetComponent<SpinZoomListener>().enabled = (i == floor_id);
+            GlobalPool.floors[i].floor.GetComponent<FloorClickListener>().enabled = (i == floor_id);
         }
         // TODO: Animate camera to focus on new floor ?
     }

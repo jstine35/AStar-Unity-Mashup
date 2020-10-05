@@ -401,14 +401,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09acbb99e2a950a4898d524b4aa22fe0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lookAtTargetPos: {x: 0, y: 0, z: 0}
+  lookAtTargetPos: {x: 0, y: 32, z: 0}
   viewAngles:
-  - 24
+  - 30
   - 45
+  - 56
   viewSizes:
-  - 18
-  - 26
-  - 36
+  - 20
+  - 30
+  - 40
   rotationTime: 0.25
 --- !u!1 &1096255666
 GameObject:
