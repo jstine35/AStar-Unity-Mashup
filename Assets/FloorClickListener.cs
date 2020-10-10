@@ -107,11 +107,11 @@ public class FloorClickListener : MonoBehaviour
     }
 #endif
     
-    Vector3 dbg_Mouseish;
-    Vector3 dbg_DbgPoint3;
-    Vector3 dbg_DbgPointInv;
-    Vector3 dbg_rayorigin;
-    Vector3 dbg_raydir;
+    float3 dbg_Mouseish;
+    float3 dbg_DbgPoint3;
+    float3 dbg_DbgPointInv;
+    float3 dbg_rayorigin;
+    float3 dbg_raydir;
 
   
     void Start()
@@ -146,7 +146,7 @@ public class FloorClickListener : MonoBehaviour
             var coord = main.TranslateWorldCoordToGrid(inv);
             var target = new int2((int)coord.x,(int) coord.y);
 
-            dbg_Mouseish = coord; 
+            dbg_Mouseish.xy = coord; 
             dbg_DbgPoint3 = epoint;
             dbg_DbgPointInv = inv;
             

@@ -109,9 +109,9 @@ public class main : MonoBehaviour
     [Range(0.4f, 1.2f)]
     [Tooltip("Adjust size of each wall block, smaller values create gaps between tiles for more retro look")]
     public float wallSizeScale = 0.9f;
-    private Vector3 visibleWallSizeScale = Vector3.negativeInfinity;    // -1 to force re-init
+    private float3 visibleWallSizeScale = Vector3.negativeInfinity;    // -1 to force re-init
 
-    public Vector3 origin;      // specifies top left corner, for friendly gameboard coordinate logicss
+    public float3 origin;      // specifies top left corner, for friendly gameboard coordinate logicss
 
     [Tooltip("Contains maps in plaintext format.")]
     public string MapFile  = "cube1.ascmap";
@@ -128,27 +128,27 @@ public class main : MonoBehaviour
     public bool restartPathRunner;
     
 
-    public Vector3 MapGridScale            => new Vector3(tileSizeUnits, 1, tileSizeUnits);
-    public Vector3 MapGridTransToOrigin    => new Vector3(tileSizeUnits, 1, tileSizeUnits);
-    public Vector3 MapGridTransToOriginInv => new Vector3(1.0f/tileSizeUnits, 1, 1.0f/tileSizeUnits);
+    public float3 MapGridScale            => new float3(tileSizeUnits, 1, tileSizeUnits);
+    public float3 MapGridTransToOrigin    => new float3(tileSizeUnits, 1, tileSizeUnits);
+    public float3 MapGridTransToOriginInv => new float3(1.0f/tileSizeUnits, 1, 1.0f/tileSizeUnits);
 
-    public Vector2 MapGridSize2            => new Vector2(tileSizeUnits,    tileSizeUnits);
-    public Vector3 MapGridSize3            => new Vector3(tileSizeUnits, 0, tileSizeUnits);
-    public Vector3 CubeWallHeight3         => new Vector3(0, cubeWallHeight, 0);
+    public float2 MapGridSize2            => new float2(tileSizeUnits,    tileSizeUnits);
+    public float3 MapGridSize3            => new float3(tileSizeUnits, 0, tileSizeUnits);
+    public float3 CubeWallHeight3         => new float3(0, cubeWallHeight, 0);
 
     public static GameObject tileSelector;
 
     private string[] curmap;
 
-    public Vector3 TranslateGridCoordToWorld(int2 coord) {
-        var vec = Vector3.Scale(new Vector3(coord.x + 0.5f, 0, coord.y + 0.5f), MapGridTransToOrigin);
+    public float3 TranslateGridCoordToWorld(int2 coord) {
+        var vec = new float3(coord.x + 0.5f, 0, coord.y + 0.5f) * MapGridTransToOrigin;
         return origin + vec;
     }
 
-    public Vector2 TranslateWorldCoordToGrid(Vector3 world) {
+    public float2 TranslateWorldCoordToGrid(float3 world) {
         var vec = world - origin;
-        var gridunits = Vector3.Scale(vec, MapGridTransToOriginInv);
-        return new Vector2(gridunits.x, gridunits.z);
+        var gridunits = vec * MapGridTransToOriginInv;
+        return new float2(gridunits.x, gridunits.z);
     }
 
     void SetupAvatars()
@@ -245,18 +245,18 @@ public class main : MonoBehaviour
         //   left and right maps should be identical sizes.
         //   top.y == right.y
 
-        //    var size = new Vector2(map[0].Length, map.Length);
+        //    var size = new float2(map[0].Length, map.Length);
 
         var map = GlobalPool.floors[0].Map;
-        var size = new Vector2(map[0].Length, map.Length);
+        var size = new float2(map[0].Length, map.Length);
 
-        var centroid = Vector3.zero;
+        var centroid = float3.zero;
         var angle = 0;
         for(int i=0; i<GlobalPool.floors.Length; ++i) {
             if (GlobalPool.floors[i].xformObj == null) continue;
             var xform = GlobalPool.floors[i].xformObj.transform;
             xform.localPosition = Vector3.up * (size.x * MapGridSize2.x) / 2;
-            xform.RotateAround(Vector3.zero, Vector3.forward, angle);
+            xform.RotateAround(float3.zero, Vector3.forward, angle);
             xform.localRotation = Quaternion.AngleAxis(angle, Vector3.forward);
             angle -= 90;
         }
@@ -298,13 +298,13 @@ public class main : MonoBehaviour
     Mesh cubeWallUnitMesh;    
     Mesh cubeWallMesh;
 
-    public void BuildCubeWallMesh(Vector2 size, float height) {
+    public void BuildCubeWallMesh(float2 size, float height) {
         if (cubeWallUnitMesh == null) {
             cubeWallUnitMesh = Instantiate(cubeWallPrefab.GetComponent<MeshFilter>().sharedMesh);
         }
 
-        var scale3 = new Vector3(size.x * wallSizeScale, cubeWallHeight, size.y * wallSizeScale);
-        if (visibleWallSizeScale == scale3) return;
+        var scale3 = new float3(size.x * wallSizeScale, cubeWallHeight, size.y * wallSizeScale);
+        if (math.all(visibleWallSizeScale == scale3)) return;
         visibleWallSizeScale = scale3;
 
         Debug.Log($"Rebuilding cubeWall scale = {visibleWallSizeScale}");
@@ -320,7 +320,7 @@ public class main : MonoBehaviour
         int2 map_size = new int2 { x = map[0].Length, y = map.Length };
 
         var planeUnitsAtScale1 = 1.0f;
-        var planeSize = new Vector3(
+        var planeSize = new float3(
             x: map_size.x * tileSizeUnits / planeUnitsAtScale1,
             y: 1,
             z: map_size.y * tileSizeUnits / planeUnitsAtScale1
@@ -344,7 +344,7 @@ public class main : MonoBehaviour
         }
 
 		for (int i = 0; i < origvtx.Length; i++) {
-			destvtx[i] = Vector3.Scale(origvtx[i], planeSize) + new Vector3(0,miny,0);
+			destvtx[i] = (origvtx[i] * planeSize) + new float3(0,miny,0);
         }
 
         mesh.vertices = destvtx;
@@ -352,7 +352,7 @@ public class main : MonoBehaviour
         mesh.RecalculateBounds();
 
         plane.GetComponent<BoxCollider>().size   = planeSize;
-        plane.GetComponent<BoxCollider>().center = new Vector3(0, miny, 0);
+        plane.GetComponent<BoxCollider>().center = new float3(0, miny, 0);
     }
 
     public void BuildMap(int floor_id) {
@@ -369,7 +369,7 @@ public class main : MonoBehaviour
         BuildCubeWallMesh(MapGridSize2, cubeWallHeight);
         BuildFloor(floor);
 
-        transform.position = new Vector3(0,0,origin.x);
+        transform.position = new float3(0,0,origin.x);
         var map = GlobalPool.maps[floor.map_id];
         int2 map_size = map.Size;
 
@@ -387,7 +387,7 @@ public class main : MonoBehaviour
                 newcube.GetComponent<MeshFilter>().mesh = cubeWallMesh;
                 floor.walls.Add(newcube);
                 newcube.transform.localPosition = startpos;
-                newcube.transform.localRotation = Quaternion.identity; // Quaternion.AngleAxis(90, Vector3.right);
+                newcube.transform.localRotation = Quaternion.identity; // Quaternion.AngleAxis(90, float3.right);
                 newcube.tag                     = "DynamicLevelObject";
             }
         }
@@ -449,7 +449,7 @@ public class main : MonoBehaviour
         }
 
         if (rebuildMap) {
-            visibleWallSizeScale = Vector3.zero;
+            visibleWallSizeScale = float3.zero;
             ReloadMaps();
         }
 

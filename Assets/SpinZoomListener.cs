@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Mathematics;
 
 public struct MoveTowardsPair {
     public float curr;
@@ -51,7 +52,7 @@ public class SpinZoomListener : MonoBehaviour
     }
     
 #region Public Fields (Unity Editable)
-    public Vector3 lookAtTargetPos;
+    public float3 lookAtTargetPos;
 
     public float[] viewAngles = new float[] {
         24,
@@ -68,7 +69,7 @@ public class SpinZoomListener : MonoBehaviour
 #endregion
 
     bool        lastMouseIsSpinning = false;
-    Vector3     lastMouseSpinViewPos;
+    float3      lastMouseSpinViewPos;
     float       spinOrientY = 45;
 
     MoveTowardsPair  ViewAngle;
@@ -86,7 +87,7 @@ public class SpinZoomListener : MonoBehaviour
         var radius      = ViewSize;
         var height      = radius * Mathf.Tan(ViewAngle * Mathf.Deg2Rad);
 
-        gameObject.transform.position = new Vector3(radius, height, 0) + lookAtTargetPos;
+        gameObject.transform.position = new float3(radius, height, 0) + lookAtTargetPos;
         gameObject.transform.RotateAround(Vector3.zero, Vector3.up, spinOrientY);
 
         gameObject.transform.LookAt(lookAtTargetPos);
@@ -130,7 +131,7 @@ public class SpinZoomListener : MonoBehaviour
                     lastMouseIsSpinning = true;
                 }
                 else {
-                    var delta = Input.mousePosition - lastMouseSpinViewPos;
+                    var delta = (float3)Input.mousePosition - lastMouseSpinViewPos;
                     spinOrientY += delta.x / 6;
                 }
                 lastMouseSpinViewPos = Input.mousePosition;
