@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Unity.Mathematics;
 
 [ExecuteInEditMode]
 public class FollowPath : MonoBehaviour
@@ -51,8 +52,8 @@ public class FollowPath : MonoBehaviour
     }
 
     // returns current/nearest position in the 2D path finding grid.
-    public Vector2Int GetMapPos2D() {
-           return new Vector2Int();
+    public int2 GetMapPos2D() {
+           return int2.zero;
         // cast a ray from the current position toward the gameboard plane.
         // Determine intersection point and pass through TranslateWorldCoordToGrid()
         

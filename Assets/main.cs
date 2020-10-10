@@ -5,7 +5,7 @@ using System.Linq;
 using System.IO;
 using UnityEngine;
 using AStar;
-using UnityEditor;
+using Unity.Mathematics;
 
 public static partial class PartialExtensions {
     public static double GetUnixTimeSecs(this System.DateTime date) {
@@ -74,7 +74,7 @@ public static class YPath {
         var backtrack = curpos;
         
         var pathstate = GlobalPool.yieldablePathState;
-        while (!backtrack.equal0()) {
+        while (backtrack.x !=0 && backtrack.y != 0) {
             var next = pathstate.internal_map[backtrack].Parent;
             waypoints.Add(backtrack);
             backtrack = next;
@@ -408,7 +408,7 @@ public class main : MonoBehaviour
         var waypoints = new List<int2>();
 
         var backtrack = curpos;
-        while (!backtrack.equal0()) {
+        while (backtrack.x !=0 && backtrack.y != 0) {
             var next = pathstate.internal_map[backtrack].Parent;
             waypoints.Add(backtrack);
             backtrack = next;

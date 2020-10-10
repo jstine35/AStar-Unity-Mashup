@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using AStar;
 using UnityEngine;
+using Unity.Mathematics;
 
 // TODO: Upgrade this to use IPointerClickHandler after upgrading to Unity 2019.
 

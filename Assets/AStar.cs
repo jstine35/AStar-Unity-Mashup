@@ -4,22 +4,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using UnityEngine;
+using Unity.Mathematics;
 
 namespace AStar
 {
-    public struct int2 {
-        public int x,y;
-
-        public int2(int _x, int _y) {
-            x = _x;
-            y = _y;
-        }
-
-        public bool equal0() {
-            return x == 0 && y == 0;
-        }
-    };
-
     public struct AwesomeTile {
         public int F;
         public int G;
