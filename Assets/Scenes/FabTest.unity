@@ -121,6 +121,36 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &693363001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 693363003}
+  m_Layer: 0
+  m_Name: SystemRun
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &693363003
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 693363001}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -3.9172678, y: -0.07954121, z: 5.81527}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &726525378
 GameObject:
   m_ObjectHideFlags: 0
@@ -402,12 +432,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09acbb99e2a950a4898d524b4aa22fe0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ZoomLevel: 3
-  ZoomAngle: 1
-  RotationSpeed: 120
-  PerspectiveAnglesLo: {x: -66, y: -8}
-  PerspectiveAnglesHi: {x: -40, y: -4}
-  gameBoard: {fileID: 0}
+  lookAtTargetPos: {x: 0, y: 0, z: 0}
+  viewAngles:
+  - 24
+  - 45
+  viewSizes:
+  - 18
+  - 26
+  - 36
+  rotationTime: 0.25
 --- !u!114 &1534391839
 MonoBehaviour:
   m_ObjectHideFlags: 0
