@@ -19,7 +19,7 @@ public class PathCollision : MonoBehaviour
     void OnCollisionEnter(Collision collision)
     {
         ContactPoint contact = collision.contacts[0];
-        Quaternion rotation = Quaternion.FromToRotation(Vector3.up, contact.normal);
+        Quaternion rotation = Quaternion.FromToRotation(Cardinal.up, contact.normal);
         Vector3 position = contact.point;
         Debug.Log("Thump!");
         //Instantiate(explosionPrefab, position, rotation);

@@ -255,9 +255,9 @@ public class main : MonoBehaviour
         for(int i=0; i<GlobalPool.floors.Length; ++i) {
             if (GlobalPool.floors[i].xformObj == null) continue;
             var xform = GlobalPool.floors[i].xformObj.transform;
-            xform.localPosition = Vector3.up * (size.x * MapGridSize2.x) / 2;
-            xform.RotateAround(float3.zero, Vector3.forward, angle);
-            xform.localRotation = Quaternion.AngleAxis(angle, Vector3.forward);
+            xform.localPosition = Cardinal.up * (size.x * MapGridSize2.x) / 2;
+            xform.RotateAround(float3.zero, Cardinal.forward, angle);
+            xform.localRotation = Quaternion.AngleAxis(angle, Cardinal.forward);
             angle -= 90;
         }
     }
